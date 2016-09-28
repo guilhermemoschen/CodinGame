@@ -5,3 +5,4 @@
 /Codingame/bin/Debug
 /Codingame/obj/Debug
 *.user
+*.suo

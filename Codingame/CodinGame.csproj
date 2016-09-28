@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BotProgramming\HyperSonic.cs" />
     <Compile Include="SinglePlayer\ASCIIArt.cs" />
     <Compile Include="BotProgramming\BackToTheCode.cs" />
     <Compile Include="SinglePlayer\ChuckNorris.cs" />
