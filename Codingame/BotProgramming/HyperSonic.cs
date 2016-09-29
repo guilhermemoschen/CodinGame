@@ -9,97 +9,165 @@ namespace CodinGame.BotProgramming.HyperSonic
 {
     public class Game
     {
+        public static Board Board;
+
         static void Main(string[] args)
         {
-            string[] inputs;
-            inputs = Console.ReadLine().Split(' ');
-            int width = int.Parse(inputs[0]);
-            int height = int.Parse(inputs[1]);
-            int myId = int.Parse(inputs[2]);
-
-            var board = new Board(width, height, myId);
-            var bombService = new BombService(board);
-            var movimentService = new ActionService(board);
-
-            Action currentAction = null;
+            var inputs = Console.ReadLine().Split(' ');
+            var width = Convert.ToInt32(inputs[0]);
+            var height = Convert.ToInt32(inputs[1]);
+            var playerId = Convert.ToInt32(inputs[2]);
+            Board = new Board(width, height, playerId);
+            var actionManager = new ActionManager();
 
             // game loop
             while (true)
             {
                 var rows = new Collection<string>();
-
-                for (int i = 0; i < height; i++)
+                for (var i = 0; i < height; i++)
                 {
                     rows.Add(Console.ReadLine());
                 }
 
-                foreach (var row in rows)
-                    Console.Error.WriteLine(row);
+                //foreach (var row in rows)
+                //    Console.Error.WriteLine(row);
 
                 var entities = new List<string[]>();
-                int entitiesCount = int.Parse(Console.ReadLine());
-                for (int i = 0; i < entitiesCount; i++)
+                var entitiesCount = Convert.ToInt32(Console.ReadLine());
+                for (var i = 0; i < entitiesCount; i++)
                 {
                     entities.Add(Console.ReadLine().Split(' '));
                 }
 
-                board.Update(rows, entities);
+                Board.Update(rows, entities);
 
-                var possibility = bombService.CalculateBestOptionToPlaceBomb();
+                actionManager.Process();
 
-                if (currentAction == null || currentAction.IsFinished)
-                {
-                    currentAction = new PlaceBomb(board, possibility.BombNode.Position);
-                }
-
-                currentAction.Process();
-
-                Console.WriteLine(currentAction.GetAction());
+                Console.WriteLine(actionManager.GetNextAction());
             }
         }
     }
 
-    public class PlaceBomb : Action
+    public class ActionManager
     {
-        private bool isBomPlaced = false;
+        public Action CurrentAction { get; set; }
+        public BombService BombService { get; set; }
+        public DodgeService DodgeService { get; set; }
 
+        public ActionManager()
+        {
+            BombService = new BombService();
+            DodgeService = new DodgeService();
+        }
+
+        public void Process()
+        {
+            BombService.CalculateBestOptionToPlaceBomb();
+
+            if (Game.Board.Player.WillExplode)
+            {
+                Console.Error.WriteLine("Player In Danger");
+                var safePosition = DodgeService.GetClosestSafePosition();
+                if (safePosition != null)
+                    CurrentAction = new MoveAction(safePosition.Value);
+            }
+            else if (Game.Board.Player.HasBombs)
+            {
+                CurrentAction = BombService.GetPlaceBomb();
+            }
+            else if (BombService.ExplosionPossibilities.Any())
+            {
+                CurrentAction = new MoveAction(BombService.ExplosionPossibilities.First().BombNode.Position);
+            }
+
+            if (CurrentAction == null)
+            {
+                CurrentAction = new WaitAction();
+            }
+
+            CurrentAction.Process();
+        }
+
+        public string GetNextAction()
+        {
+            return CurrentAction.GetAction();
+        }
+    }
+
+    public class DodgeService
+    {
+        public Point? GetClosestSafePosition()
+        {
+            var safeNode = Game.Board.GetReachableNodes()
+                .Where(x => !x.WillExplode)
+                .OrderBy(x => x.DistanceOfPlayer)
+                .FirstOrDefault();
+
+            if (safeNode == null)
+                return null;
+
+            return safeNode.Position;
+        }
+    }
+
+    public class PlaceBombAction : Action
+    {
+        public Point TargetPosition { get; set; }
+        public Point? NextTargetPosition { get; set; }
+
+        public PlaceBombAction(Point targetPosition, Point? nextTargetPosition)
+        {
+            TargetPosition = targetPosition;
+            NextTargetPosition = nextTargetPosition;
+        }
+
+        public override void Process()
+        {
+            if (Game.Board.Player.Position == TargetPosition && Game.Board.Player.AvailableBombs > 0)
+            {
+                if (NextTargetPosition != null)
+                    NextAction = string.Format("BOMB {0} {1}", NextTargetPosition.Value.X, NextTargetPosition.Value.Y);
+                else
+                    NextAction = string.Format("BOMB {0} {1}", TargetPosition.X, TargetPosition.Y);
+            }
+            else
+            {
+                NextAction = string.Format("MOVE {0} {1}", TargetPosition.X, TargetPosition.Y);
+            }
+        }
+    }
+
+    public class MoveAction : Action
+    {
         public Point TargetPosition { get; set; }
 
-        public PlaceBomb(Board board, Point targetPosition) : base(board)
+        public MoveAction(Point targetPosition)
         {
             TargetPosition = targetPosition;
         }
 
         public override void Process()
         {
-            if (isBomPlaced)
-            {
-                IsFinished = true;
-                return;
-            }
-
-            if (Board.Player.Position == TargetPosition && Board.Player.AvailableBombs > 0)
-            {
-                NextAction = string.Format("BOMB {0} {1}", TargetPosition.X, TargetPosition.Y);
-                isBomPlaced = true;
-                return;
-            }
-
             NextAction = string.Format("MOVE {0} {1}", TargetPosition.X, TargetPosition.Y);
+        }
+    }
+
+    public class WaitAction : Action
+    {
+        public override void Process()
+        {
+            NextAction = string.Format("MOVE {0} {1} Waiting", Game.Board.Player.Position.X, Game.Board.Player.Position.Y);
         }
     }
 
     public abstract class Action
     {
-        public Board Board { get; set; }
-
         protected string NextAction;
 
         public bool IsFinished { get; protected set; }
 
-        protected Action(Board board)
+        protected Action()
         {
-            Board = board;
             IsFinished = false;
         }
 
@@ -110,7 +178,6 @@ namespace CodinGame.BotProgramming.HyperSonic
             return NextAction;
         }
     }
-
 
     public class ActionService
     {
@@ -127,43 +194,59 @@ namespace CodinGame.BotProgramming.HyperSonic
         }
     }
 
+    public class MovementService
+    {
+        
+    }
+
     public class BombService
     {
-        public ExplosionPossiblity[,] ExplosionPossibilities { get; set; }
+        public IList<ExplosionPossiblity> ExplosionPossibilities { get; set; }
 
-        public Board Board { get; set; }
-
-        public BombService(Board board)
+        public BombService()
         {
-            Board = board;
+            ExplosionPossibilities = new List<ExplosionPossiblity>();
         }
 
-        public ExplosionPossiblity CalculateBestOptionToPlaceBomb()
+        public void CalculateBestOptionToPlaceBomb()
         {
-            ExplosionPossibilities = new ExplosionPossiblity[Board.Width, Board.Height];
+            ExplosionPossibilities.Clear();
 
-            foreach (var node in Board.Nodes.Cast<Node>().Where(x => x.CanPlaceBomb))
+            foreach (var node in Game.Board.GetReachableNodes().Where(x => !x.WillExplode))
             {
-                var affectedBoxes = Board.GetBoxesInRange(node, Board.Player.ExplosionRange);
-                ExplosionPossibilities[node.Position.X, node.Position.Y] = new ExplosionPossiblity()
+                var affectedBoxes = Game.Board.GetBoxesInRange(node, Game.Board.Player.ExplosionRange);
+
+                ExplosionPossibilities.Add(new ExplosionPossiblity()
                 {
                     BombNode = node,
-                    Player = Board.Player,
-                    AffectedBoxes = affectedBoxes,
-                };
+                    Player = Game.Board.Player,
+                    AffectedBoxes = affectedBoxes.Where(x => !x.WillExplode),
+                });
             }
 
-            var possibleExplosions = ExplosionPossibilities.Cast<ExplosionPossiblity>()
-                .Where(x => x != null)
+            ExplosionPossibilities = ExplosionPossibilities
+                .Where(x => x.AffectedBoxes.Any())
                 .OrderByDescending(x => x.Score)
                 .ToList();
 
-            foreach (var p in possibleExplosions.Take(5))
+            foreach (var p in ExplosionPossibilities.Take(5))
             {
-                //Console.Error.WriteLine("{0} - {1}", p.BombNode.Position, p.Score);
+                Console.Error.WriteLine("Bomb {0} Score {1} Boxes {2} Distance {3}", p.BombNode.Position, p.Score, p.AffectedBoxes.Count(), p.BombNode.DistanceOfPlayer);
+            }
+        }
+
+        public Action GetPlaceBomb()
+        {
+            if (!ExplosionPossibilities.Any())
+                return null;
+
+            Point? nextTargetPosition = null;
+            if (ExplosionPossibilities.Count() > 1)
+            {
+                nextTargetPosition = ExplosionPossibilities.Skip(1).First().BombNode.Position;
             }
 
-            return possibleExplosions.FirstOrDefault();
+            return new PlaceBombAction(ExplosionPossibilities.First().BombNode.Position, nextTargetPosition);
         }
     }
 
@@ -183,7 +266,7 @@ namespace CodinGame.BotProgramming.HyperSonic
         {
             get
             {
-                return (AffectedBoxes.Count() * 5) - Player.Position.GetDistance(BombNode.Position);
+                return (AffectedBoxes.Count() * 4) - BombNode.DistanceOfPlayer;
             }
         }
     }
@@ -193,12 +276,18 @@ namespace CodinGame.BotProgramming.HyperSonic
         public int AvailableBombs { get; set; }
         public int ExplosionRange { get; set; }
 
+        public bool HasBombs
+        {
+            get { return AvailableBombs > 0; }
+        }
+
         public BomberMan(string[] inputs)
         {
             Id = int.Parse(inputs[1]);
             Position = new Point(int.Parse(inputs[2]), int.Parse(inputs[3]));
             AvailableBombs = Convert.ToInt32(inputs[4]);
             ExplosionRange = Convert.ToInt32(inputs[5]);
+            Type = NodeType.Bomberman;
         }
     }
 
@@ -214,16 +303,84 @@ namespace CodinGame.BotProgramming.HyperSonic
             Position = new Point(int.Parse(inputs[2]), int.Parse(inputs[3]));
             RoundsToExplode = Convert.ToInt32(inputs[4]);
             ExplosionRange = Convert.ToInt32(inputs[5]);
+            Type = NodeType.Bomb;
         }
     }
 
-    public class Entity
+    public class Item : Entity
+    {
+        public ItemType ItemType { get; set; }
+        public Item(string[] inputs)
+        {
+            Id = int.Parse(inputs[1]);
+            Position = new Point(int.Parse(inputs[2]), int.Parse(inputs[3]));
+            ItemType = ParseItemType(inputs[3]);
+            Type = NodeType.Item;
+        }
+
+        public ItemType ParseItemType(string itemType)
+        {
+            switch (itemType)
+            {
+                case Node.ItemExtraRangeCell:
+                    return ItemType.ExtraRange;
+
+                case Node.ItemExtraBombCell:
+                    return ItemType.ExtraBomb;
+
+                default:
+                    return ItemType.Undefined;
+            }
+        }
+    }
+
+    public enum ItemType
+    {
+        ExtraRange,
+        ExtraBomb,
+        Undefined,
+    }
+
+    public class Entity : Node
     {
         public const string BomberManEntityType = "0";
         public const string BombEntityType = "1";
+        public const string ItemEntityType = "2";
+
+        public int Id { get; set; }
+    }
+
+    public class Node
+    {
+        public const string FloorCell = ".";
+        public const string WallCell = "X";
+        public const string EmptyCell = "0";
+        public const string ItemExtraRangeCell = "1";
+        public const string ItemExtraBombCell = "2";
+        public bool WillExplode { get; set; }
 
         public Point Position { get; set; }
-        public int Id { get; set; }
+        public NodeType Type { get; set; }
+
+        public int DistanceOfPlayer { get; set; }
+
+        public Node()
+        {
+            DistanceOfPlayer = -1;
+        }
+
+        public bool CanPlaceBomb
+        {
+            get
+            {
+                return Type == NodeType.Floor || Game.Board.IsPlayer(this);
+            }
+        }
+    }
+
+    public class Box : Node
+    {
+        
     }
 
     public class Board
@@ -238,6 +395,7 @@ namespace CodinGame.BotProgramming.HyperSonic
 
         public IList<BomberMan> BomberMans { get; set; }
         public IList<Bomb> Bombs { get; set; }
+        public IList<Item> Items { get; set; }
 
         public Board(int width, int height, int playerId)
         {
@@ -247,6 +405,7 @@ namespace CodinGame.BotProgramming.HyperSonic
             Nodes = new Node[Width, Height];
             BomberMans = new List<BomberMan>();
             Bombs = new List<Bomb>();
+            Items = new List<Item>();
             MaxNodeDistance = Height * Width;
         }
 
@@ -260,13 +419,30 @@ namespace CodinGame.BotProgramming.HyperSonic
                         .Skip(y)
                         .First();
 
-                    Nodes[x, y] = new Node(row.Skip(x).First().ToString(), x, y);
+                    var nodeType = ParseCellType(row.Skip(x).First().ToString());
 
+                    if (nodeType == NodeType.Box)
+                    {
+                        Nodes[x, y] = new Box()
+                        {
+                            Position = new Point(x, y),
+                            Type = nodeType,
+                        };
+                    }
+                    else
+                    {
+                        Nodes[x, y] = new Node()
+                        {
+                            Position = new Point(x, y),
+                            Type = nodeType,
+                        };
+                    }
                 }
             }
 
             BomberMans.Clear();
             Bombs.Clear();
+            Items.Clear();
 
             foreach (var entity in entities)
             {
@@ -279,6 +455,10 @@ namespace CodinGame.BotProgramming.HyperSonic
                     case Entity.BombEntityType:
                         AddBomb(new Bomb(entity));
                         break;
+
+                    case Entity.ItemEntityType:
+                        AddItem(new Item(entity));
+                        break;
                 }
             }
 
@@ -289,69 +469,214 @@ namespace CodinGame.BotProgramming.HyperSonic
         public void AddBomberMan(BomberMan bomberMan)
         {
             BomberMans.Add(bomberMan);
-            Nodes[bomberMan.Position.X, bomberMan.Position.Y] = new Node()
-            {
-                Position = bomberMan.Position,
-                Type = Node.ParseCellType((bomberMan.Id + 1).ToString()),
-            };
+            Nodes[bomberMan.Position.X, bomberMan.Position.Y] = bomberMan;
         }
 
         public void AddBomb(Bomb bomb)
         {
             Bombs.Add(bomb);
-            Nodes[bomb.Position.X, bomb.Position.Y] = new Node()
-            {
-                Position = bomb.Position,
-                Type = NodeType.Bomb,
-            };
+            Nodes[bomb.Position.X, bomb.Position.Y] = bomb;
+
+            UpdateBoxes(bomb);
+            UpdateFloors(bomb);
         }
 
-        public void PrintBoard()
+        public void AddItem(Item item)
         {
-            Console.Error.WriteLine(string.Empty);
-            for (var y = 0; y < Height; y++)
+            Items.Add(item);
+            Nodes[item.Position.X, item.Position.Y] = item;
+        }
+
+        public void UpdateFloors(Bomb bomb)
+        {
+            // Test Up
+            for (var i = 1; i < bomb.ExplosionRange; i++)
             {
-                var row = string.Empty;
-                for (var x = 0; x < Width; x++)
+                var currentPosition = bomb.Position.Clone();
+                currentPosition.Offset(0, -i);
+                if (IsOutOfBounds(currentPosition))
+                    break;
+
+                if (!IsFloor(currentPosition) && !IsBomberMan(currentPosition))
+                    break;
+
+                var floor = GetNode(currentPosition);
+                floor.WillExplode = true;
+            }
+
+            // Test Down
+            for (var i = 1; i < bomb.ExplosionRange; i++)
+            {
+                var currentPosition = bomb.Position.Clone();
+                currentPosition.Offset(0, i);
+                if (IsOutOfBounds(currentPosition))
+                    break;
+
+                if (!IsFloor(currentPosition) && !IsBomberMan(currentPosition))
+                    break;
+
+                var floor = GetNode(currentPosition);
+                floor.WillExplode = true;
+            }
+
+            // Test Left
+            for (var i = 1; i < bomb.ExplosionRange; i++)
+            {
+                var currentPosition = bomb.Position.Clone();
+                currentPosition.Offset(-i, 0);
+                if (IsOutOfBounds(currentPosition))
+                    break;
+
+                if (!IsFloor(currentPosition) && !IsBomberMan(currentPosition))
+                    break;
+
+                var floor = GetNode(currentPosition);
+                floor.WillExplode = true;
+            }
+
+            // Test Right
+            for (var i = 1; i < bomb.ExplosionRange; i++)
+            {
+                var currentPosition = bomb.Position.Clone();
+                currentPosition.Offset(i, 0);
+
+                if (IsOutOfBounds(currentPosition))
+                    break;
+
+                if (!IsFloor(currentPosition) && !IsBomberMan(currentPosition))
+                    break;
+
+                var floor = GetNode(currentPosition);
+                floor.WillExplode = true;
+            }
+        }
+
+        public void UpdateBoxes(Bomb bomb)
+        {
+            foreach (var box in GetBoxesInRange(bomb, bomb.ExplosionRange))
+            {
+                box.WillExplode = true;
+                //Console.Error.WriteLine("Box {0} Will explode", box.Position);
+            }
+        }
+
+        public IEnumerable<Node> GetReachableNodes()
+        {
+            var reachableNodes = new List<Node>();
+            var currentNode = (Node) Player;
+            currentNode.DistanceOfPlayer = 0;
+            reachableNodes.Add(currentNode);
+            while (true)
+            {
+                var nextNode = GetAboveNodeForPlayer(currentNode.Position);
+
+                if (nextNode == null || reachableNodes.Any(x => x.Position == nextNode.Position))
+                    nextNode = GetBelowNodeForPlayer(currentNode.Position);
+
+                if (nextNode == null || reachableNodes.Any(x => x.Position == nextNode.Position))
+                    nextNode = GetLeftNodeForPlayer(currentNode.Position);
+
+                if (nextNode == null || reachableNodes.Any(x => x.Position == nextNode.Position))
+                    nextNode = GetRightNodeForPlayer(currentNode.Position);
+
+                if (nextNode == null || reachableNodes.Any(x => x.Position == nextNode.Position))
                 {
-                    switch (Nodes[x, y].Type)
-                    {
-                        case NodeType.Bomb:
-                            row += "B";
-                            break;
+                    if (reachableNodes.IndexOf(currentNode) == 0)
+                        break;
 
-                        case NodeType.Box:
-                            row += "X";
-                            break;
-
-                        case NodeType.Floor:
-                            row += ".";
-                            break;
-
-                        case NodeType.Player1:
-                            row += "1";
-                            break;
-
-                        case NodeType.Player2:
-                            row += "2";
-                            break;
-
-                        case NodeType.Player3:
-                            row += "3";
-                            break;
-
-                        case NodeType.Player4:
-                            row += "4";
-                            break;
-
-                        case NodeType.Undefined:
-                            row += "U";
-                            break;
-                    }
+                    currentNode = reachableNodes[reachableNodes.IndexOf(currentNode) - 1];
+                    continue;
                 }
 
-                Console.Error.WriteLine(row);
+                nextNode.DistanceOfPlayer = currentNode.DistanceOfPlayer + 1;
+                reachableNodes.Add(nextNode);
+                currentNode = nextNode;
             }
+
+            return reachableNodes;
+        }
+
+        public Node GetAboveNodeForPlayer(Point playerPosition)
+        {
+            if (!CanPlayerMoveUp(playerPosition))
+                return null;
+
+            return Nodes[playerPosition.X, playerPosition.Y - 1];
+        }
+
+        public bool CanPlayerMoveUp(Point playerPosition)
+        {
+            if (playerPosition.Y == 0)
+                return false;
+
+            var nextNode = Nodes[playerPosition.X, playerPosition.Y - 1];
+            return CanPlayerMoveTo(nextNode.Position);
+        }
+
+        public Node GetBelowNodeForPlayer(Point playerPosition)
+        {
+            if (!CanPlayerMoveDown(playerPosition))
+                return null;
+
+            return Nodes[playerPosition.X, playerPosition.Y + 1];
+        }
+
+        public bool CanPlayerMoveDown(Point playerPosition)
+        {
+            if (playerPosition.Y == Height - 1)
+                return false;
+
+            var nextNode = Nodes[playerPosition.X, playerPosition.Y + 1];
+            return CanPlayerMoveTo(nextNode.Position);
+        }
+
+        public Node GetLeftNodeForPlayer(Point playerPosition)
+        {
+            if (!CanPlayerMoveLeft(playerPosition))
+                return null;
+
+            return Nodes[playerPosition.X - 1, playerPosition.Y];
+        }
+
+        public bool CanPlayerMoveLeft(Point playerPosition)
+        {
+            if (playerPosition.X == 0)
+                return false;
+
+            var nextNode = Nodes[playerPosition.X - 1, playerPosition.Y];
+            return CanPlayerMoveTo(nextNode.Position);
+        }
+
+        public Node GetRightNodeForPlayer(Point playerPosition)
+        {
+            if (!CanPlayerMoveRight(playerPosition))
+                return null;
+
+            return Nodes[playerPosition.X + 1, playerPosition.Y];
+        }
+
+        public bool CanPlayerMoveRight(Point playerPosition)
+        {
+            if (playerPosition.X == Width - 1)
+                return false;
+
+            var nextNode = Nodes[playerPosition.X + 1, playerPosition.Y];
+            return CanPlayerMoveTo(nextNode.Position);
+        }
+
+        public bool CanPlayerMoveTo(Point position)
+        {
+            return IsFloor(position) || IsItem(position);
+        }
+
+        public bool IsBomberMan(Point position)
+        {
+            return IsBomberMan(GetNode(position));
+        }
+
+        public bool IsBomberMan(Node node)
+        {
+            return node.Type == NodeType.Bomberman;
         }
 
         public bool IsBox(Point position)
@@ -379,17 +704,17 @@ namespace CodinGame.BotProgramming.HyperSonic
             return position.Y < 0 || position.Y >= Height || position.X < 0 || position.X >= Width;
         }
 
-        internal Node GetNode(Point currentPosition)
+        internal Node GetNode(Point position)
         {
-            return Nodes[currentPosition.X, currentPosition.Y];
+            return Nodes[position.X, position.Y];
         }
 
-        public IEnumerable<Node> GetBoxesInRange(Node node, int explosionRange)
+        public IEnumerable<Box> GetBoxesInRange(Node node, int explosionRange)
         {
-            var boxes = new Collection<Node>();
+            var boxes = new Collection<Box>();
 
             // Test Up
-            for (var i = 0; i < explosionRange; i++)
+            for (var i = 1; i < explosionRange; i++)
             {
                 var currentPosition = node.Position.Clone();
                 currentPosition.Offset(0, -i);
@@ -399,14 +724,18 @@ namespace CodinGame.BotProgramming.HyperSonic
                 if (IsFloor(currentPosition))
                     continue;
 
-                if (IsBox(currentPosition))
-                    boxes.Add(GetNode(currentPosition));
+                if (IsItem(currentPosition) || IsWall(currentPosition) || IsBomb(currentPosition))
+                    break;
 
-                break;
+                if (IsBox(currentPosition))
+                {
+                    boxes.Add((Box)GetNode(currentPosition));
+                    break;
+                }
             }
 
             // Test Down
-            for (var i = 0; i < explosionRange; i++)
+            for (var i = 1; i < explosionRange; i++)
             {
                 var currentPosition = node.Position.Clone();
                 currentPosition.Offset(0, i);
@@ -416,14 +745,18 @@ namespace CodinGame.BotProgramming.HyperSonic
                 if (IsFloor(currentPosition))
                     continue;
 
-                if (IsBox(currentPosition))
-                    boxes.Add(GetNode(currentPosition));
+                if (IsItem(currentPosition) || IsWall(currentPosition) || IsBomb(currentPosition))
+                    break;
 
-                break;
+                if (IsBox(currentPosition))
+                {
+                    boxes.Add((Box)GetNode(currentPosition));
+                    break;
+                }
             }
 
             // Test Left
-            for (var i = 0; i < explosionRange; i++)
+            for (var i = 1; i < explosionRange; i++)
             {
                 var currentPosition = node.Position.Clone();
                 currentPosition.Offset(-i, 0);
@@ -433,29 +766,37 @@ namespace CodinGame.BotProgramming.HyperSonic
                 if (IsFloor(currentPosition))
                     continue;
 
-                if (IsBox(currentPosition))
-                    boxes.Add(GetNode(currentPosition));
+                if (IsItem(currentPosition) || IsWall(currentPosition) || IsBomb(currentPosition))
+                    break;
 
-                break;
+                if (IsBox(currentPosition))
+                {
+                    boxes.Add((Box)GetNode(currentPosition));
+                    break;
+                }
             }
 
             // Test Right
-            for (var i = 0; i < explosionRange; i++)
+            for (var i = 1; i < explosionRange; i++)
             {
                 var currentPosition = node.Position.Clone();
-                currentPosition.Offset(-i, 0);
+                currentPosition.Offset(i, 0);
+
                 if (IsOutOfBounds(currentPosition))
                     break;
 
                 if (IsFloor(currentPosition))
                     continue;
 
+                if (IsItem(currentPosition) || IsWall(currentPosition) || IsBomb(currentPosition))
+                    break;
+
                 if (IsBox(currentPosition))
-                    boxes.Add(GetNode(currentPosition));
-
-                break;
+                {
+                    boxes.Add((Box)GetNode(currentPosition));
+                    break;
+                }
             }
-
 
             //Console.Error.WriteLine("Boxes for Node {0} Range {1}", node.Position, explosionRange);
             //foreach (var box in boxes)
@@ -466,47 +807,39 @@ namespace CodinGame.BotProgramming.HyperSonic
             return boxes;
         }
 
-        public void ResetDistances()
+        public bool IsBomb(Point position)
         {
-            foreach (var node in Nodes)
-            {
-                node.DistanceToPlayer = MaxNodeDistance;
-            }
+            return IsBomb(Nodes[position.X, position.Y]);
         }
 
-        public void UpdateDistances(Node startingNode)
+        public bool IsBomb(Node node)
         {
-            ResetDistances();
+            return node.Type == NodeType.Bomb;
+        }
 
-            startingNode.DistanceToPlayer = 0;
+        public bool IsWall(Point position)
+        {
+            return IsWall(Nodes[position.X, position.Y]);
+        }
 
-            while (true)
-            {
-                var madeProgress = false;
+        public bool IsWall(Node node)
+        {
+            return node.Type == NodeType.Wall;
+        }
 
-                foreach (var node in Nodes)
-                {
-                    // look through valid moves given the coordinates of that square.
-                    var nodesToWalk = GetValidNodesToWalk(node);
-                    Console.Error.WriteLine("nodesToWalk {0}", nodesToWalk.Count());
-                    foreach (var nodeToWalk in nodesToWalk)
-                    {
+        public bool IsItem(Point position)
+        {
+            return IsItem(Nodes[position.X, position.Y]);
+        }
 
+        public bool IsItem(Node node)
+        {
+            return node.Type == NodeType.Item;
+        }
 
-                        var newPass = node.DistanceToPlayer + 1;
-                        if (nodeToWalk.DistanceToPlayer > newPass)
-                        {
-                            nodeToWalk.DistanceToPlayer = newPass;
-                            // Console.Error.WriteLine("{0} - {1}", nodeToWalk.Position, nodeToWalk.DistanceToPlayer);
-                            madeProgress = true;
-                        }
-                    }
-                }
-
-                Console.Error.WriteLine("madeProgress");
-                if (!madeProgress)
-                    break;
-            }
+        public bool IsPlayer(Node node)
+        {
+            return node.Position == Player.Position;
         }
 
         public IEnumerable<Node> GetValidNodesToWalk(Node node)
@@ -548,100 +881,20 @@ namespace CodinGame.BotProgramming.HyperSonic
             return moves;
         }
 
-        public bool CanFindShortestPath(Point start, Point end)
-        {
-            var startingPoint = GetNode(start);
-            var endingPoint = GetNode(end);
-
-            Console.Error.WriteLine("Start {0} End {1}", start, end);
-
-            if (start == end)
-                return true;
-
-            UpdateDistances(startingPoint);
-            var currentPoint = endingPoint;
-
-            while (true)
-            {
-                // Look through each direction and find the square
-                // with the lowest number of steps marked.
-                Node lowestNode = null;
-                var lowestDistance = MaxNodeDistance;
-
-                foreach (var nodeToWalk in GetValidNodesToWalk(currentPoint))
-                {
-                    if (nodeToWalk.DistanceToPlayer < lowestDistance)
-                    {
-                        lowestDistance = nodeToWalk.DistanceToPlayer;
-                        lowestNode = nodeToWalk;
-                    }
-                }
-
-                if (lowestNode == null || lowestNode.DistanceToPlayer == MaxNodeDistance)
-                    break;
-
-                currentPoint = lowestNode;
-
-                if (currentPoint.Position == startingPoint.Position)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
-    public class Node
-    {
-        public const string FloorCell = ".";
-        public const string BoxCell = "0";
-
-        public Point Position { get; set; }
-        public NodeType Type { get; set; }
-
-        public bool CanPlaceBomb
-        {
-            get
-            {
-                return Type == NodeType.Floor || Type == NodeType.Player1 || Type == NodeType.Player2 || Type == NodeType.Player3 || Type == NodeType.Player4;
-            }
-        }
-
-        public int DistanceToPlayer { get; set; }
-
-        public Node()
-        {
-
-        }
-
-        public Node(string cellType, int x, int y)
-        {
-            Type = ParseCellType(cellType);
-            Position = new Point(x, y);
-        }
-
-        public static NodeType ParseCellType(string cellType)
+        public NodeType ParseCellType(string cellType)
         {
             switch (cellType)
             {
-                case FloorCell:
+                case Node.FloorCell:
                     return NodeType.Floor;
 
-                case BoxCell:
+                case Node.EmptyCell:
+                case Node.ItemExtraBombCell:
+                case Node.ItemExtraRangeCell:
                     return NodeType.Box;
 
-                case "1":
-                    return NodeType.Player1;
-
-                case "2":
-                    return NodeType.Player2;
-
-                case "3":
-                    return NodeType.Player3;
-
-                case "4":
-                    return NodeType.Player4;
+                case Node.WallCell:
+                    return NodeType.Wall;
 
                 default:
                     return NodeType.Undefined;
@@ -654,10 +907,9 @@ namespace CodinGame.BotProgramming.HyperSonic
         Floor,
         Bomb,
         Box,
-        Player1,
-        Player2,
-        Player3,
-        Player4,
+        Bomberman,
+        Item,
+        Wall,
         Undefined,
     }
 
