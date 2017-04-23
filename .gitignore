@@ -6,3 +6,9 @@
 /Codingame/obj/Debug
 *.user
 *.suo
+/.vs
+/.vs
+/.vs/ProjectSettings.json
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/Codingame/obj/Release
