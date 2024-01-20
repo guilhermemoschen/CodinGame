@@ -1,21 +1,6 @@
-﻿// TODO: Should attack opponent?
-
-// TODO: Back in time?
-
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
 using System.Data;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Policy;
-using System.Text;
-using System.Threading;
-using System.Xml.Serialization;
 
 namespace Codingame.BackToTheCode.Version4
 {

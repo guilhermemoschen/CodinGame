@@ -1,0 +1,12 @@
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\Puzzles.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\Puzzles.AssemblyInfoInputs.cache
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\Puzzles.AssemblyInfo.cs
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\Puzzles.csproj.CoreCompileInputs.cache
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\Puzzles.sourcelink.json
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\bin\Debug\net8.0\Puzzles.deps.json
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\bin\Debug\net8.0\Puzzles.dll
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\bin\Debug\net8.0\Puzzles.pdb
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\Puzzles.dll
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\refint\Puzzles.dll
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\Puzzles.pdb
+C:\Users\catarina\Documents\repos\guilhermemoschen\CodinGame\src\Puzzles\obj\Debug\net8.0\ref\Puzzles.dll

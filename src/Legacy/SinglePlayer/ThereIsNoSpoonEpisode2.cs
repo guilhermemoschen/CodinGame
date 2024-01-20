@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data.Odbc;
-using System.Data.OleDb;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.Hosting;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
-
-namespace Codingame.ThereIsNoSpoon24
+﻿namespace Codingame.ThereIsNoSpoon24
 {
     public class Program
     {

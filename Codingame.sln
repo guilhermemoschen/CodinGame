@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodinGame", "Codingame\CodinGame.csproj", "{3E0D980F-DAF2-4982-8C2D-D2501C1AC2F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Puzzles", "src\Puzzles\Puzzles.csproj", "{DE7B5BA4-A082-44B4-975F-53E84847AC07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Legacy", "src\Legacy\Legacy.csproj", "{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D64228FB-7731-4AA2-A547-4EAD2B9E271B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,12 +18,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3E0D980F-DAF2-4982-8C2D-D2501C1AC2F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E0D980F-DAF2-4982-8C2D-D2501C1AC2F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E0D980F-DAF2-4982-8C2D-D2501C1AC2F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E0D980F-DAF2-4982-8C2D-D2501C1AC2F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF440C03-044C-4326-A1A7-780B9DA671E1}
 	EndGlobalSection
 EndGlobal
