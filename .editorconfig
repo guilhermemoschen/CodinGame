@@ -6,6 +6,15 @@ dotnet_diagnostic.SA0001.severity = none
 # SA1101: Prefix local calls with this
 dotnet_diagnostic.SA1101.severity = none
 
+# SA1202: Elements should be ordered by access
+dotnet_diagnostic.SA1202.severity = none
+
+# SA1204: Static elements should appear before instance elements
+dotnet_diagnostic.SA1204.severity = none
+
+# SA1309: Field names should not begin with underscore
+dotnet_diagnostic.SA1309.severity = none
+
 # SA1402: File may only contain a single type
 dotnet_diagnostic.SA1402.severity = none
 
@@ -17,3 +26,6 @@ dotnet_diagnostic.SA1633.severity = none
 
 # S2190: Loops and recursions should not be infinite
 dotnet_diagnostic.S2190.severity = none
+
+# S3260: Non-derived "private" classes and records should be "sealed"
+dotnet_diagnostic.S3260.severity = none
