@@ -85,4 +85,5 @@ var CGArgs = new[]
     "2222.",
 };
 
-ThereIsNoSpoonEpisode2.Main(CGArgs);
+// ThereIsNoSpoonEpisode2.Main(CGArgs);
+BlunderEpisode1.Main(BlunderEpisode1.TestCases.Loop);
