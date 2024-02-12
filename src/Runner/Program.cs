@@ -86,4 +86,4 @@ var CGArgs = new[]
 };
 
 // ThereIsNoSpoonEpisode2.Main(CGArgs);
-BlunderEpisode1.Main(BlunderEpisode1.TestCases.Loop);
+BlunderEpisode2.Main(BlunderEpisode2TestCases.Rooms1275);
