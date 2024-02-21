@@ -1,4 +1,4 @@
-﻿namespace Puzzles.Multiplayer.Optimization;
+﻿namespace CodinGame.Solo.Optimization;
 
 using System;
 using System.Collections.Generic;

@@ -1,10 +1,10 @@
-﻿namespace Puzzles.Medium;
+﻿namespace CodinGame.Solo.Puzzles.Medium;
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using static Puzzles.Medium.MayanCalculation;
+using static CodinGame.Solo.Puzzles.Medium.MayanCalculation;
 
 public static class MayanCalculation
 {
@@ -103,7 +103,7 @@ public static class MayanCalculation
                 {
                     for (var columns = 0; columns < characterWidth; columns++)
                     {
-                        character[rows, columns] = alphabetAsChar[rows, columns + (i * characterWidth)];
+                        character[rows, columns] = alphabetAsChar[rows, columns + i * characterWidth];
                     }
                 }
 

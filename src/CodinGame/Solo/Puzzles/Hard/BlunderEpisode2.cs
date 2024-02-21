@@ -1,4 +1,4 @@
-﻿namespace Puzzles.Medium;
+﻿namespace CodinGame.Solo.Puzzles.Hard;
 
 using System;
 using System.Collections.Generic;
