@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Puzzles", "src\Puzzles\Puzzles.csproj", "{DE7B5BA4-A082-44B4-975F-53E84847AC07}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Legacy", "src\Legacy\Legacy.csproj", "{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D64228FB-7731-4AA2-A547-4EAD2B9E271B}"
@@ -14,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Runner", "src\Runner\Runner.csproj", "{CF1A65B5-E2D7-4BA3-89BE-A67C0157D3C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGolf", "src\CodeGolf\CodeGolf.csproj", "{615D1890-11F2-46BC-98B6-A91690BAABEF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodinGame", "src\CodinGame\CodinGame.csproj", "{A1D95EDA-5D2A-4974-A7ED-1F979D21FC08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,10 +20,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DE7B5BA4-A082-44B4-975F-53E84847AC07}.Release|Any CPU.Build.0 = Release|Any CPU
 		{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56EECAD6-DEE7-4A0D-BB5D-644D46CD08C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -34,10 +28,10 @@ Global
 		{CF1A65B5-E2D7-4BA3-89BE-A67C0157D3C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF1A65B5-E2D7-4BA3-89BE-A67C0157D3C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF1A65B5-E2D7-4BA3-89BE-A67C0157D3C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{615D1890-11F2-46BC-98B6-A91690BAABEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{615D1890-11F2-46BC-98B6-A91690BAABEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{615D1890-11F2-46BC-98B6-A91690BAABEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{615D1890-11F2-46BC-98B6-A91690BAABEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1D95EDA-5D2A-4974-A7ED-1F979D21FC08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1D95EDA-5D2A-4974-A7ED-1F979D21FC08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1D95EDA-5D2A-4974-A7ED-1F979D21FC08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1D95EDA-5D2A-4974-A7ED-1F979D21FC08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

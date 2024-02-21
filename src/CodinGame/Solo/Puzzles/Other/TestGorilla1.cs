@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 
 namespace TestTaker
@@ -7,8 +8,8 @@ namespace TestTaker
     {
         public static int VersionCompare(string version1, string version2)
         {
-            var version1Parts = version1.Split('.').Select(p => int.Parse(p)).ToList();
-            var version2Parts = version2.Split('.').Select(p => int.Parse(p)).ToList();
+            var version1Parts = version1.Split('.').Select(p => int.Parse(p, CultureInfo.InvariantCulture)).ToList();
+            var version2Parts = version2.Split('.').Select(p => int.Parse(p, CultureInfo.InvariantCulture)).ToList();
 
             for (var i = 0; i < version1Parts.Count; i++)
             {
