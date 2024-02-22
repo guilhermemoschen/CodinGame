@@ -61,6 +61,7 @@ public static class MayanCalculation
                     numberAsChar[i, j] = line[j];
                 }
             }
+
             number.Digits.Add(numerals.Digits.Find(n => n.Equal(numberAsChar))!);
         }
 
@@ -69,19 +70,14 @@ public static class MayanCalculation
 
     private static decimal Calculate(decimal number1, decimal number2, string operation)
     {
-        switch (operation)
+        return operation switch
         {
-            case "+":
-                return number1 + number2;
-            case "-":
-                return number1 - number2;
-            case "*":
-                return number1 * number2;
-            case "/":
-                return number1 / number2;
-        }
-
-        return 0;
+            "+" => number1 + number2,
+            "-" => number1 - number2,
+            "*" => number1 * number2,
+            "/" => number1 / number2,
+            _ => 0,
+        };
     }
 
     internal class Numerals
@@ -103,7 +99,7 @@ public static class MayanCalculation
                 {
                     for (var columns = 0; columns < characterWidth; columns++)
                     {
-                        character[rows, columns] = alphabetAsChar[rows, columns + i * characterWidth];
+                        character[rows, columns] = alphabetAsChar[rows, columns + (i * characterWidth)];
                     }
                 }
 
@@ -162,7 +158,6 @@ public static class MayanCalculation
                 return result;
             }
         }
-
 
         public List<Digit> Digits { get; } = new List<Digit>();
 

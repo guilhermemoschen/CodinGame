@@ -53,7 +53,7 @@ public static class ThereIsNoSpoonEpisode2
 
                 if (i % 2 == 0)
                 {
-                    var compactRow = args[2 + i / 2].ToCharArray();
+                    var compactRow = args[2 + (i / 2)].ToCharArray();
 
                     for (var j = 0; j < compactRow.Length; j++)
                     {
@@ -774,7 +774,7 @@ public static class ThereIsNoSpoonEpisode2
                 return false;
             }
 
-            return From.Id == link.From.Id && To.Id == link.To.Id || To.Id == link.From.Id && From.Id == link.To.Id;
+            return (From.Id == link.From.Id && To.Id == link.To.Id) || (To.Id == link.From.Id && From.Id == link.To.Id);
         }
 
         public override bool Equals(object? obj)

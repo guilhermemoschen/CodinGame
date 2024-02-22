@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 public static class MovesInMaze
 {
@@ -14,20 +13,22 @@ public static class MovesInMaze
 
         if (args.Length == 0)
         {
-            var lines = new List<string>();
-            lines.Add(Console.ReadLine()!);
-            var h = int.Parse(lines.First().Split(' ')[1], CultureInfo.InvariantCulture);
+            var lines = new List<string>
+            {
+                Console.ReadLine()!,
+            };
+            var h = int.Parse(lines[0].Split(' ')[1], CultureInfo.InvariantCulture);
 
             for (int i = 0; i < h; i++)
             {
                 lines.Add(Console.ReadLine()!);
             }
+
             inputs = lines.ToArray();
         }
         else
         {
             inputs = args;
-
         }
 
         var board = CreateBoard(inputs);
@@ -211,7 +212,7 @@ public static class MovesInMaze
             board[cell.Y][nextX] = nextPoints;
             return null;
         }
-        
+
         if (board[cell.Y][nextX] != '.')
         {
             return null;
@@ -228,7 +229,9 @@ public static class MovesInMaze
     private class Cell
     {
         public int X { get; set; }
+
         public int Y { get; set; }
+
         public char Points { get; set; }
     }
 }

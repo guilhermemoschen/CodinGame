@@ -105,20 +105,6 @@ public static class CodeVsZombies
                 .First();
         }
 
-        private bool CanBeSaved(Character human)
-        {
-            var zombie = GetClosestZombie(human);
-            if (zombie == null)
-            {
-                return true;
-            }
-
-            var turnsUntilSave = Math.Floor((decimal)human.GetDistance(Ash) / Ash.DisntacePerTurn);
-            var turnsUntilDie = Math.Floor((decimal)human.GetDistance(zombie) / Zombie.DisntacePerTurn);
-
-            return turnsUntilSave - 1 <= turnsUntilDie;
-        }
-
         public Zombie? GetClosestZombie(Character human)
         {
             return Zombies
@@ -169,12 +155,12 @@ public static class CodeVsZombies
 
     public class Human : Character
     {
-        public int WillDieIn { get; set; } = int.MaxValue;
-
         public Human(string input)
             : base(input)
         {
         }
+
+        public int WillDieIn { get; set; } = int.MaxValue;
 
         public override string ToString()
         {

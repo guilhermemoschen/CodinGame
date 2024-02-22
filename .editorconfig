@@ -24,6 +24,9 @@ dotnet_diagnostic.SA1600.severity = none
 # SA1633: File should have header
 dotnet_diagnostic.SA1633.severity = none
 
+# S1643: Strings should not be concatenated using '+' in a loop
+dotnet_diagnostic.S1643.severity = none
+
 # S2190: Loops and recursions should not be infinite
 dotnet_diagnostic.S2190.severity = none
 

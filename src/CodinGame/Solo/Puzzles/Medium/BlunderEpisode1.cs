@@ -457,7 +457,7 @@ public static class BlunderEpisode1
                 BoardAsString[row][column] = Space;
             }
 
-            if (BoardAsString[nextY][nextX] == Space || destroyCharacter && BoardAsString[nextY][nextX] == BreakableObstacle)
+            if (BoardAsString[nextY][nextX] == Space || (destroyCharacter && BoardAsString[nextY][nextX] == BreakableObstacle))
             {
                 BoardAsString[nextY][nextX] = Blunder;
             }

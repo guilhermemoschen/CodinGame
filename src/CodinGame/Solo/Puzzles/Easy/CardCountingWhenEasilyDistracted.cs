@@ -19,7 +19,6 @@ public static class CardCountingWhenEasilyDistracted
         else
         {
             inputs = args;
-
         }
 
         foreach (var input in inputs)
