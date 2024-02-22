@@ -1,3 +1,3 @@
 ﻿using CodinGame.Solo.Puzzles.Easy;
 
-OneDSpreadsheet.Main(OneDSpreadsheetTestCases.DeepBirecursion);
+CardCountingWhenEasilyDistracted.Main(CardCountingWhenEasilyDistractedTestCases.Test6);
