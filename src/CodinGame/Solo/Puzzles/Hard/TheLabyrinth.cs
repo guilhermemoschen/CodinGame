@@ -19,7 +19,7 @@ namespace Codingame
     public class CrossRoad
     {
         public Point Position { get; set; }
-        public CrossRoadOption CameFrom { get; set; }
+        public CrossRoadOption? CameFrom { get; set; }
         public List<CrossRoadOption> Options { get; set; }
 
         public CrossRoad()
@@ -30,7 +30,7 @@ namespace Codingame
 
     public class CrossRoadOption
     {
-        public string Direction { get; set; }
+        public string Direction { get; set; } = null!;
         public bool Visited { get; set; }
     }
 
@@ -64,18 +64,18 @@ namespace Codingame
         public const string Up = "UP";
         public const string Down = "DOWN";
 
-        public static List<CrossRoad> Decisions { get; set; }
+        public static List<CrossRoad> Decisions { get; set; } = null!;
 
         static void Main(string[] args)
         {
             string[] inputs;
-            inputs = Console.ReadLine().Split(' ');
+            inputs = Console.ReadLine()!.Split(' ');
             int R = int.Parse(inputs[0]); // number of rows.
             int C = int.Parse(inputs[1]); // number of columns.
             int A = int.Parse(inputs[2]);
             // number of rounds between the time the alarm countdown is activated and the time the alarm goes off.
 
-            string lastDirection = null;
+            string? lastDirection = null;
             var kirkStatus = KirkStatus.Discovering;
             Decisions = new List<CrossRoad>();
 
@@ -102,13 +102,13 @@ namespace Codingame
             // game loop
             while (true)
             {
-                inputs = Console.ReadLine().Split(' ');
+                inputs = Console.ReadLine()!.Split(' ');
                 var kirkPosition = new Point(int.Parse(inputs[1]), int.Parse(inputs[0]));
                 var mazeAsString = new List<string>();
 
                 for (var i = 0; i < R; i++)
                 {
-                    var row = Console.ReadLine();
+                    var row = Console.ReadLine()!;
                     //Console.Error.WriteLine(row);
                     mazeAsString.Add(row);
                 }
@@ -143,7 +143,7 @@ namespace Codingame
                         break;
 
                     case KirkStatus.GoingToControlRoom:
-                        if (kirkPosition == maze.FindSquare(SquareContent.ControlRoom).Position)
+                        if (kirkPosition == maze.FindSquare(SquareContent.ControlRoom)?.Position)
                         {
                             kirkStatus = KirkStatus.GoingToStartingPoint;
                             Console.Error.WriteLine("Reached Control Room");
@@ -169,19 +169,19 @@ namespace Codingame
 
         private static string GetNextStepToStartingPoint(Maze maze, Point kirkPosition)
         {
-            var startingPoint = maze.FindSquare(kirkPosition);
+            var startingPoint = maze.FindSquare(kirkPosition)!;
             var destination = maze.FindSquare(SquareContent.StartingPoint);
-            return maze.GetNextStepToDestination(startingPoint, destination);
+            return maze.GetNextStepToDestination(startingPoint, destination!)!;
         }
 
         private static string GetNextStepToControlRoom(Maze maze, Point kirkPosition)
         {
-            var startingPoint = maze.FindSquare(kirkPosition);
+            var startingPoint = maze.FindSquare(kirkPosition)!;
             var destination = maze.FindSquare(SquareContent.ControlRoom);
-            return maze.GetNextStepToDestination(startingPoint, destination);
+            return maze.GetNextStepToDestination(startingPoint, destination!)!;
         }
 
-        private static string GetDirectionForDiscovering(string lastDirection, Point kirkPosition, Maze maze)
+        private static string? GetDirectionForDiscovering(string? lastDirection, Point kirkPosition, Maze maze)
         {
             if (lastDirection == null)
             {
@@ -189,7 +189,7 @@ namespace Codingame
                 var options = GetOptions(kirkPosition, maze);
 
                 if (options.Count == 1)
-                    return options.FirstOrDefault().Direction;
+                    return options.FirstOrDefault()?.Direction;
 
                 var crossRoad = new CrossRoad()
                 {
@@ -201,7 +201,7 @@ namespace Codingame
                 Decisions.Add(crossRoad);
 
                 var selectedPath = crossRoad.Options.FirstOrDefault();
-                selectedPath.Visited = true;
+                selectedPath!.Visited = true;
                 return selectedPath.Direction;
             }
 
@@ -211,18 +211,18 @@ namespace Codingame
                 var options = GetOptions(kirkPosition, maze);
 
                 if (options.Count == 1)
-                    return options.FirstOrDefault().Direction;
+                    return options.FirstOrDefault()?.Direction;
 
                 if (options.Count == 2)
                 {
-                    var direction = options.FirstOrDefault(x => x.Direction != InvertDirection(lastDirection)).Direction;
+                    var direction = options.FirstOrDefault(x => x.Direction != InvertDirection(lastDirection))?.Direction;
                     return direction;
                 }
 
                 Console.Error.WriteLine("never been here");
 
                 var cameFrom = GetCameFrom(options, lastDirection);
-                options.Remove(cameFrom);
+                options.Remove(cameFrom!);
 
                 var crossRoad = new CrossRoad()
                 {
@@ -232,7 +232,7 @@ namespace Codingame
                 crossRoad.Options.AddRange(options);
                 Decisions.Add(crossRoad);
                 var selectedPath = crossRoad.Options.FirstOrDefault();
-                selectedPath.Visited = true;
+                selectedPath!.Visited = true;
                 return selectedPath.Direction;
             }
 
@@ -243,7 +243,7 @@ namespace Codingame
             if (notVisitedPath == null)
             {
                 Console.Error.WriteLine("need to go back");
-                return decision.CameFrom.Direction;
+                return decision.CameFrom?.Direction;
             }
 
             Console.Error.WriteLine("going to new path");
@@ -252,7 +252,7 @@ namespace Codingame
             return notVisitedPath.Direction;
         }
 
-        private static string InvertDirection(string direction)
+        private static string? InvertDirection(string direction)
         {
             switch (direction)
             {
@@ -272,12 +272,12 @@ namespace Codingame
             return null;
         }
 
-        private static CrossRoad GetPastDecision(Point kirkPosition)
+        private static CrossRoad? GetPastDecision(Point kirkPosition)
         {
             return Decisions.FirstOrDefault(x => x.Position == kirkPosition);
         }
 
-        private static CrossRoadOption GetCameFrom(IList<CrossRoadOption> options, string lastDirection)
+        private static CrossRoadOption? GetCameFrom(IList<CrossRoadOption> options, string lastDirection)
         {
             return options.FirstOrDefault(x => x.Direction == InvertDirection(lastDirection));
         }
@@ -315,7 +315,7 @@ namespace Codingame
             var kirkSquare = FindSquare(kirkPosition);
 
             // Can reach Control Room
-            if (!FindShortsPath(kirkSquare, controlRoom))
+            if (!FindShortsPath(kirkSquare!, controlRoom))
                 return false;
 
             var knowingDistance = GetShortestDistance(controlRoom, startingPoint, false);
@@ -330,7 +330,7 @@ namespace Codingame
             return end.DistanceSteps;
         }
 
-        public Square[][] Board { get; set; }
+        public Square[][] Board { get; set; } = null!;
 
         public void CreateMaze(IList<string> maze)
         {
@@ -384,7 +384,7 @@ namespace Codingame
             }
         }
 
-        public Square FindSquare(SquareContent content)
+        public Square? FindSquare(SquareContent content)
         {
             return Board.SelectMany(row => row).FirstOrDefault(cell => cell.Content == content);
         }
@@ -420,7 +420,7 @@ namespace Codingame
             return moves;
         }
 
-        public string GetNextStepToDestination(Square start, Square end)
+        public string? GetNextStepToDestination(Square start, Square end)
         {
             FindShortsPath(start, end);
             //DisplayDistances();
@@ -472,7 +472,7 @@ namespace Codingame
             {
                 // Look through each direction and find the square
                 // with the lowest number of steps marked.
-                Square lowestSquare = null;
+                Square? lowestSquare = null;
                 var lowestDistance = Square.MaxDistance;
 
                 foreach (var square in GetValidMoves(currentPoint))
@@ -538,7 +538,7 @@ namespace Codingame
             return Board[destination.Y][destination.X].CanMove(false, false);
         }
 
-        public Square FindSquare(Point position)
+        public Square? FindSquare(Point position)
         {
             if (position.Y < 0 ||
                 position.Y >= Board.Length ||
@@ -608,7 +608,7 @@ namespace Codingame
         public Point Position { get; set; }
         public bool Visited { get; set; }
 
-        public string ContentAsString
+        public string? ContentAsString
         {
             get
             {

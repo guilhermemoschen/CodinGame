@@ -1,3 +1,6 @@
-﻿using CodinGame.Solo.Puzzles.Easy;
+﻿using CodinGame;
+using CodinGame.Solo.Puzzles.Easy;
 
-CardCountingWhenEasilyDistracted.Main(CardCountingWhenEasilyDistractedTestCases.Test6);
+using var runner = RunnerBuilder.Create()
+    .WithTestCase(SixDegreesOfKevinBaconTestCases.TwoDegreesOfKevinBaconReads)
+    .Run(SixDegreesOfKevinBacon.Main);

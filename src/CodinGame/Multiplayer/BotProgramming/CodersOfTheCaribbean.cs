@@ -1,23 +1,20 @@
 using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Collections.ObjectModel;
+using System.Drawing;
+using System.Linq;
 
-namespace CodinGame.BotProgramming.CodersOfTheCaribbean
+namespace CodinGame.Multiplayer.BotProgramming
 {
-    public class Board
+    public class Board2
     {
         public const int Height = 21;
         public const int Width = 23;
-        private ICollection<Entity> entities;
+        private ICollection<Entity2> entities;
 
-        public Board()
+        public Board2()
         {
-            entities = new Collection<Entity>();
+            entities = new Collection<Entity2>();
         }
 
         internal void AddShip(int entityId, int x, int y, string arg1, string arg2, string arg3, string arg4)
@@ -118,7 +115,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return entities
                 .OfType<Barrel>()
                 .Where(x => avoidedBarrels.All(y => y.Position != x.Position))
-                .OrderBy(x => x.Position.GetDistance(position));
+                .OrderBy(x => HexagonalExtensions.GetDistance(x.Position, position));
         }
 
         public Ship GetClosestEnemy(Point playerPosition)
@@ -126,7 +123,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return entities
                 .OfType<Ship>()
                 .Where(x => !x.IsControlledByPlayer)
-                .OrderBy(x => x.Position.GetDistance(playerPosition))
+                .OrderBy(x => HexagonalExtensions.GetDistance(x.Position, playerPosition))
                 .First();
         }
 
@@ -214,15 +211,15 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return points.Distinct();
         }
         
-        public IEnumerable<Entity> GetEntities(IEnumerable<Point> positions)
+        public IEnumerable<Entity2> GetEntities(IEnumerable<Point> positions)
         {
             return entities
                 .Where(x => positions.Any(y => y == x.Position));
         }
 
-        public IEnumerable<Entity> GetThreats(IEnumerable<Point> positions)
+        public IEnumerable<Entity2> GetThreats(IEnumerable<Point> positions)
         {
-            var threats = new List<Entity>();
+            var threats = new List<Entity2>();
 
             threats.AddRange(
                 entities
@@ -243,7 +240,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return entity is Mine;
         }
 
-        public Entity GetEntity(Point position)
+        public Entity2? GetEntity(Point position)
         {
             return entities
                 .FirstOrDefault(x => x.Position == position);
@@ -377,19 +374,19 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
         }
     }
 
-    public abstract class Entity
+    public abstract class Entity2
     {
         public int Id { get; private set; }
         public Point Position { get; private set; }
 
-        public Entity(int id, Point position)
+        public Entity2(int id, Point position)
         {
             Id = id;
             Position = position;
         }
     }
 
-    public class Barrel : Entity
+    public class Barrel : Entity2
     {
         public const int MaxRumPerBarrel = 26;
         public const int MinRumPerBarrel = 10;
@@ -403,7 +400,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
         }
     }
 
-    public class Ship : Entity
+    public class Ship : Entity2
     {
         public const int Height = 3;
         public const int Width = 1;
@@ -443,7 +440,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
         }
     }
 
-    public class CannonBall : Entity
+    public class CannonBall : Entity2
     {
         public int TurnsBeforeImpact { get; set; }
         public int OwnerId { get; set; }
@@ -457,7 +454,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
         }
     }
 
-    public class Mine : Entity
+    public class Mine : Entity2
     {
         public Mine(int id, Point position)
             : base(id, position)
@@ -603,17 +600,17 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
     public class CodersOfTheCaribbeanAI
     {
         private Random random;
-        private Board board;
-        private ICollection<PlayerInfo> playerInfos;
+        private Board2 board2 = null!;
+        private ICollection<PlayerInfo> playerInfos = null!;
         private ICollection<Barrel> alreadyTargetBarrels;
-        private IEnumerable<Mine> mines;
-        private IList<Entity> alreadyTargetEntities;
+        private IEnumerable<Mine> mines = null!;
+        private IList<Entity2> alreadyTargetEntities;
 
         public CodersOfTheCaribbeanAI()
         {
             random = new Random();
             alreadyTargetBarrels = new Collection<Barrel>();
-            alreadyTargetEntities = new Collection<Entity>();
+            alreadyTargetEntities = new Collection<Entity2>();
         }
 
         private PlayerInfo GetPlayerInfo(Ship playerShip)
@@ -623,11 +620,11 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
 
         internal Command GetNextCommand(Ship playerShip)
         {
-            Command command = null;
+            Command? command = null;
             var info = GetPlayerInfo(playerShip);
-            var barrels = board.GetClosestBarrel(info.Ship.Position, alreadyTargetBarrels);
-            var closestEnemy = board.GetClosestEnemy(info.Ship.Position);
-            var reachablePositions = board.GetNextReachablePositions(info.Ship.Bow, info.Ship.Direction, info.Ship.Speed - 1);
+            var barrels = board2.GetClosestBarrel(info.Ship.Position, alreadyTargetBarrels);
+            var closestEnemy = board2.GetClosestEnemy(info.Ship.Position);
+            var reachablePositions = board2.GetNextReachablePositions(info.Ship.Bow, info.Ship.Direction, info.Ship.Speed - 1);
 
             //foreach (var position in reachablePositions)
             //    Console.Error.WriteLine("{0} - reachablePositions {1}", info.Ship.Id, position);
@@ -669,20 +666,20 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return command;
         }
 
-        private Command GotoNextBarrel(PlayerInfo info, IEnumerable<Barrel> barrels)
+        private Command? GotoNextBarrel(PlayerInfo info, IEnumerable<Barrel> barrels)
         {
             if (!barrels.Any())
                 return null;
 
-            Barrel targetBarrel = null;
+            Barrel? targetBarrel = null;
 
             foreach (var barrel in barrels)
             {
                 if (alreadyTargetBarrels.Contains(barrel))
                     continue;
 
-                var pathToBarrel = board.GetPointsToTarget(info.Ship.Position, barrel.Position);
-                if (board.IsThereAnyThreat(pathToBarrel))
+                var pathToBarrel = board2.GetPointsToTarget(info.Ship.Position, barrel.Position);
+                if (board2.IsThereAnyThreat(pathToBarrel))
                     continue;
 
                 targetBarrel = barrel;
@@ -697,11 +694,11 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return new MoveCommand(targetBarrel.Position);
         }
 
-        private Command Dodge(PlayerInfo info, IEnumerable<Point> reachablePositions)
+        private Command? Dodge(PlayerInfo info, IEnumerable<Point> reachablePositions)
         {
-            var threats = board.GetThreats(reachablePositions);
+            var threats = board2.GetThreats(reachablePositions);
             var closestThreats = threats
-                .Where(x => x.Position.GetDistance(info.Ship.Bow) == 1);
+                .Where(x => HexagonalExtensions.GetDistance(x.Position, info.Ship.Bow) == 1);
 
             //foreach (var threat in closestThreats)
             //    Console.Error.WriteLine("{0} threat {1}", info.Ship.Id, threat.Position);
@@ -744,13 +741,13 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return new ChangeRotationCommand(direction);
         }
 
-        private Command ShootMine(PlayerInfo info)
+        private Command? ShootMine(PlayerInfo info)
         {
             if (!info.CanFire())
                 return null;
 
             var closestMine = mines
-                .FirstOrDefault(x => x.Position.GetDistance(info.Ship.Bow) < 5);
+                .FirstOrDefault(x => HexagonalExtensions.GetDistance(x.Position, info.Ship.Bow) < 5);
 
             if (closestMine == null)
                 return null;
@@ -761,9 +758,9 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return FireOnMine(info, closestMine);
         }
 
-        private bool HasBeenTarget(Entity entity)
+        private bool HasBeenTarget(Entity2 entity2)
         {
-            return alreadyTargetEntities.Any(x => x == entity);
+            return alreadyTargetEntities.Any(x => x == entity2);
         }
 
         private Command FireOnMine(PlayerInfo info, Mine closestMine)
@@ -773,7 +770,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return new FireCommand(closestMine.Position, info);
         }
 
-        private Command CreateRefuelCommand(PlayerInfo info, Barrel closestBarrel)
+        private Command? CreateRefuelCommand(PlayerInfo info, Barrel? closestBarrel)
         {
             if (!ShouldRefuel(info) || closestBarrel == null)
                 return null;
@@ -782,25 +779,25 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return new MoveCommand(closestBarrel.Position);
         }
 
-        private Command GetNearByBarrels(PlayerInfo info, IEnumerable<Point> nearByPositions)
+        private Command? GetNearByBarrels(PlayerInfo info, IEnumerable<Point> nearByPositions)
         {
-            var entities = board.GetEntities(nearByPositions);
+            var entities = board2.GetEntities(nearByPositions);
 
             var barrels = entities
                 .OfType<Barrel>()
-                .Where(x => x.Position.GetDistance(info.Ship.Bow) == 1);
+                .Where(x => HexagonalExtensions.GetDistance(x.Position, info.Ship.Bow) == 1);
 
             foreach (var barrel in barrels)
             {
                 var shipMotion = GetDirectionForNextPosition(info.Ship, barrel.Position);
-                var nextDirection = board.GetNextDirection(info.Ship.Direction, shipMotion);
-                var nextPositions = board.GetNextOccupiedPositions(info.Ship.Bow, nextDirection);
+                var nextDirection = board2.GetNextDirection(info.Ship.Direction, shipMotion);
+                var nextPositions = board2.GetNextOccupiedPositions(info.Ship.Bow, nextDirection);
                 foreach (var p in nextPositions)
                 {
                     Console.Error.WriteLine("{0} nextPositions {1} nextDirection {2}", info.Ship.Id, p, nextDirection);
                 }
 
-                if (board.IsThereAnyThreat(nextPositions))
+                if (board2.IsThereAnyThreat(nextPositions))
                     continue;
 
                 Console.Error.WriteLine("{0} Nearby barrel", info.Ship.Id);
@@ -810,9 +807,9 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return null;
         }
 
-        private Command CreateCommandToAvoidPosition(PlayerInfo info, Point targetPosition)
+        private Command? CreateCommandToAvoidPosition(PlayerInfo info, Point targetPosition)
         {
-            var nextPositions = board.GetNextReachablePositions(info.Ship.Bow, info.Ship.Direction, 0);
+            var nextPositions = board2.GetNextReachablePositions(info.Ship.Bow, info.Ship.Direction, 0);
             Point? safePosition = null;
 
             // Is Mine in front of the Ship
@@ -823,7 +820,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             {
                 Console.Error.WriteLine("{0} next possible safe position {1}", info.Ship.Id, position);
 
-                if (board.IsMine(position))
+                if (board2.IsMine(position))
                     continue;
 
                 safePosition = position;
@@ -839,7 +836,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
 
         private Command CreateCommandToReachPosition(PlayerInfo info,  Point targetPosition)
         {
-            var distance = info.Ship.Bow.GetDistance(targetPosition);
+            var distance = HexagonalExtensions.GetDistance(info.Ship.Bow, targetPosition);
             if (distance > 1)
                 return new MoveCommand(targetPosition);
             else
@@ -916,7 +913,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             Console.Error.WriteLine("{0} Random Move", info.Ship.Id);
 
             var nextPosition = info.Ship.Bow.GetNextPosition(info.Ship.Direction);
-            if (nextPosition != info.Ship.Bow && !nextPosition.IsOutOfBounds() && !board.IsThereAnyThreat(nextPosition))
+            if (nextPosition != info.Ship.Bow && !nextPosition.IsOutOfBounds() && !board2.IsThereAnyThreat(nextPosition))
             {
                 if (info.Ship.IsStopped)
                     return new ChangeSpeedCommand(ChangeSpeedOptions.Faster);
@@ -924,17 +921,17 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
                     return new WaitCommand();
             }
 
-            var nextDirection = board.GetNextDirection(info.Ship.Direction, ShipMotion.Port);
-            var nextPositions = board.GetNextOccupiedPositions(info.Ship, nextDirection);
-            if (!board.IsThereAnyThreat(nextPosition))
+            var nextDirection = board2.GetNextDirection(info.Ship.Direction, ShipMotion.Port);
+            var nextPositions = board2.GetNextOccupiedPositions(info.Ship, nextDirection);
+            if (!board2.IsThereAnyThreat(nextPosition))
                 return new ChangeRotationCommand(ShipMotion.Port);
 
-            nextDirection = board.GetNextDirection(info.Ship.Direction, ShipMotion.Starboard);
-            nextPositions = board.GetNextOccupiedPositions(info.Ship, nextDirection);
-            if (!board.IsThereAnyThreat(nextPosition))
+            nextDirection = board2.GetNextDirection(info.Ship.Direction, ShipMotion.Starboard);
+            nextPositions = board2.GetNextOccupiedPositions(info.Ship, nextDirection);
+            if (!board2.IsThereAnyThreat(nextPosition))
                 return new ChangeRotationCommand(ShipMotion.Starboard);
 
-            return new MoveCommand(new Point(random.Next(Board.Width), random.Next(Board.Height)));
+            return new MoveCommand(new Point(random.Next(Board2.Width), random.Next(Board2.Height)));
         }
 
         private bool ShouldRefuel(PlayerInfo playerInfo)
@@ -947,7 +944,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             if (enemy == null)
                 return false;
 
-            var distance = playerInfo.Ship.Position.GetDistance(enemy.Position);
+            var distance = HexagonalExtensions.GetDistance(playerInfo.Ship.Position, enemy.Position);
 
             if (distance > FireCommand.WeaponRange)
                 return false;
@@ -955,7 +952,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return playerInfo.CanFire();
         }
 
-        private Command FireOnEnemy(PlayerInfo info, Ship enemy)
+        private Command? FireOnEnemy(PlayerInfo info, Ship enemy)
         {
             if (!ShouldFire(info, enemy))
                 return null;
@@ -965,7 +962,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
                 return new FireCommand(enemy.Position, info);
             }
 
-            var distance = enemy.Position.GetDistance(info.Ship.Position);
+            var distance = HexagonalExtensions.GetDistance(enemy.Position, info.Ship.Position);
             var targetPosition = enemy.Position.Clone();
             var shotOffset = (int)Math.Round((double)distance / (double)FireCommand.FireSpeed) + 1;
             targetPosition = targetPosition.Move(shotOffset, enemy.Direction);
@@ -981,15 +978,15 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             return new FireCommand(targetPosition, info);
         }
 
-        public void StartNewTurn(IEnumerable<Ship> playerShips, Board board)
+        public void StartNewTurn(IEnumerable<Ship> playerShips, Board2 board2)
         {
             UpdatePlayerInfos(playerShips);
-            this.board = board;
+            this.board2 = board2;
             alreadyTargetBarrels.Clear();
-            mines = board.GetMines();
-            alreadyTargetEntities = board
+            mines = board2.GetMines();
+            alreadyTargetEntities = board2
                 .GetAlreadyTargetMines()
-                .OfType<Entity>()
+                .OfType<Entity2>()
                 .ToList();
         }
 
@@ -1026,7 +1023,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
         private int mineCounter;
         private int fireCounter;
 
-        public Command LastCommand { get; set; }
+        public Command LastCommand { get; set; } = null!;
 
         public PlayerInfo(Ship ship)
         {
@@ -1037,7 +1034,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
         }
 
         public Ship Ship { get; private set; }
-        public Barrel TargetBarrel { get; set; }
+        public Barrel TargetBarrel { get; set; } = null!;
 
         public bool IsCrashed { get; private set; }
 
@@ -1075,8 +1072,8 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
 
     public class Game
     {
-        private Board board;
-        private ICollection<Command> commands;
+        private Board2 board2 = null!;
+        private ICollection<Command> commands = null!;
         private CodersOfTheCaribbeanAI ai;
 
         public Game()
@@ -1086,13 +1083,13 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
 
         public void GetInputs()
         {
-            board = new Board();
+            board2 = new Board2();
 
-            var remainingShips = int.Parse(Console.ReadLine()); // the number of remaining ships
-            var entityCount = int.Parse(Console.ReadLine()); // the number of entities (e.g. ships, mines or cannonballs)
+            var remainingShips = int.Parse(Console.ReadLine()!); // the number of remaining ships
+            var entityCount = int.Parse(Console.ReadLine()!); // the number of entities (e.g. ships, mines or cannonballs)
             for (int i = 0; i < entityCount; i++)
             {
-                var inputs = Console.ReadLine().Split(' ');
+                var inputs = Console.ReadLine()!.Split(' ');
                 var entityId = int.Parse(inputs[0]);
                 var entityType = inputs[1];
                 var x = int.Parse(inputs[2]);
@@ -1101,32 +1098,32 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
                 switch (entityType)
                 {
                     case "SHIP":
-                        board.AddShip(entityId, x, y, inputs[4], inputs[5], inputs[6], inputs[7]);
+                        board2.AddShip(entityId, x, y, inputs[4], inputs[5], inputs[6], inputs[7]);
                         break;
 
                     case "BARREL":
-                        board.AddBarrel(entityId, x, y, inputs[4]);
+                        board2.AddBarrel(entityId, x, y, inputs[4]);
                         break;
 
                     case "CANNONBALL":
-                        board.AddCannonBall(entityId, x, y, inputs[4], inputs[4]);
+                        board2.AddCannonBall(entityId, x, y, inputs[4], inputs[4]);
                         break;
 
                     case "MINE":
-                        board.AddMine(entityId, x, y);
+                        board2.AddMine(entityId, x, y);
                         break;
                 }
             }
 
-            board.UpdateCannonBallOwership();
+            board2.UpdateCannonBallOwership();
         }
 
         internal void Process()
         {
             commands = new Collection<Command>();
 
-            var ships = board.GetPlayerShips();
-            ai.StartNewTurn(ships, board);
+            var ships = board2.GetPlayerShips();
+            ai.StartNewTurn(ships, board2);
 
             foreach (var ship in ships)
             {
@@ -1440,7 +1437,7 @@ namespace CodinGame.BotProgramming.CodersOfTheCaribbean
             if (point.X < 0 || point.Y < 0)
                 return true;
 
-            if (point.X >= Board.Width || point.Y >= Board.Height)
+            if (point.X >= Board2.Width || point.Y >= Board2.Height)
                 return true;
 
             return false;

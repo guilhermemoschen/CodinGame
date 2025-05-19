@@ -14,7 +14,7 @@ namespace Codingame.CodeOfTheRings.Version4
             string magicPhrase;
             if (args.Length == 0)
             {
-                magicPhrase = Console.ReadLine();
+                magicPhrase = Console.ReadLine()!;
             }
             else
             {
@@ -314,7 +314,7 @@ namespace Codingame.CodeOfTheRings.Version4
             }
         }
 
-        private Path CalculateInstructionLength(char currentChar, char targetChar)
+        private Path? CalculateInstructionLength(char currentChar, char targetChar)
         {
             var currentIndex = Alphabet.IndexOf(currentChar);
 

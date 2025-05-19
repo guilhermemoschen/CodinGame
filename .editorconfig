@@ -1,10 +1,15 @@
 [*.cs]
 
+max_line_length = 150
+
 # SA0001: XML comment analysis can only be performed when the project is configured to parse documentation comments. To enable this functionality, update the project to produce an XML documentation file as part of the build.
 dotnet_diagnostic.SA0001.severity = none
 
 # SA1101: Prefix local calls with this
 dotnet_diagnostic.SA1101.severity = none
+
+# SA1202: Elements should be ordered by access
+dotnet_diagnostic.SA1200.severity = none
 
 # SA1202: Elements should be ordered by access
 dotnet_diagnostic.SA1202.severity = none
@@ -32,3 +37,6 @@ dotnet_diagnostic.S2190.severity = none
 
 # S3260: Non-derived "private" classes and records should be "sealed"
 dotnet_diagnostic.S3260.severity = none
+
+#SA1201: Elements should appear in the correct order
+dotnet_diagnostic.SA1201.severity = none

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace CodinGame.BotProgramming.CodeBusters
+namespace CodinGame.Multiplayer.BotProgramming
 {
-
     /**
      * Send your busters out into the fog to trap ghosts and bring them home!
      **/
@@ -13,9 +12,9 @@ namespace CodinGame.BotProgramming.CodeBusters
     {
         static void Main(string[] args)
         {
-            var totalBusters = int.Parse(Console.ReadLine()); // the amount of busters you control
-            var totalGhosts = int.Parse(Console.ReadLine());  // the amount of ghosts on the map
-            var teamId = int.Parse(Console.ReadLine()); // if this is 0, your base is on the top left of the map, if it is one, on the bottom right
+            var totalBusters = int.Parse(Console.ReadLine()!); // the amount of busters you control
+            var totalGhosts = int.Parse(Console.ReadLine()!); // the amount of ghosts on the map
+            var teamId = int.Parse(Console.ReadLine()!); // if this is 0, your base is on the top left of the map, if it is one, on the bottom right
             var board = new Board(teamId, totalBusters, totalGhosts);
             Console.Error.WriteLine("Our Team {0}", board.TeamId);
 
@@ -23,10 +22,10 @@ namespace CodinGame.BotProgramming.CodeBusters
             {
                 board.StartTurn();
 
-                var entities = int.Parse(Console.ReadLine()); // the number of busters and ghosts visible to you
+                var entities = int.Parse(Console.ReadLine()!); // the number of busters and ghosts visible to you
                 for (int i = 0; i < entities; i++)
                 {
-                    string[] inputs = Console.ReadLine().Split(' ');
+                    string[] inputs = Console.ReadLine()!.Split(' ');
 
                     var entity = new Entity()
                     {
@@ -36,7 +35,8 @@ namespace CodinGame.BotProgramming.CodeBusters
 
                     var entityType = int.Parse(inputs[3]); // the team id if it is a buster, -1 if it is a ghost.
                     var entityState = int.Parse(inputs[4]); // For busters: 0=idle, 1=carrying a ghost.
-                    var entityValue = int.Parse(inputs[5]); // For busters: Ghost id being carried. For ghosts: number of busters attempting to trap this ghost.
+                    var entityValue =
+                        int.Parse(inputs[5]); // For busters: Ghost id being carried. For ghosts: number of busters attempting to trap this ghost.
 
                     if (entityType == board.TeamId)
                     {
@@ -56,7 +56,6 @@ namespace CodinGame.BotProgramming.CodeBusters
 
                 foreach (var buster in board.Busters)
                 {
-
                     // Write an action using Console.WriteLine()
                     // To debug: Console.Error.WriteLine("Debug messages...");
 
@@ -78,7 +77,7 @@ namespace CodinGame.BotProgramming.CodeBusters
     {
         public int TeamId { get; private set; }
 
-        protected string NextAction;
+        protected string NextAction = null!;
 
         public bool IsFinished { get; protected set; }
 
@@ -125,7 +124,7 @@ namespace CodinGame.BotProgramming.CodeBusters
             if (Buster.Position == TargetPoint)
                 GoToNextPoint();
 
-            NextAction = TargetPoint.GetAction();
+            NextAction = TargetPoint.GetAction2();
         }
     }
 
@@ -196,7 +195,7 @@ namespace CodinGame.BotProgramming.CodeBusters
                 return;
             }
 
-            var distance = Buster.Position.GetDistance(Ghost.Position);
+            var distance = Buster.Position.GetDistance2(Ghost.Position);
             if (distance <= MinRangeToTrap && distance >= MaxRangeToTrap)
             {
                 NextAction = $"BUST {Ghost.Id}";
@@ -211,11 +210,11 @@ namespace CodinGame.BotProgramming.CodeBusters
                 }
                 else
                 {
-                    var targetDistance = Buster.Position.GetDistance(Ghost.Position) - MinRangeToTrap - (MaxRangeToTrap - MinRangeToTrap) / 2;
+                    var targetDistance = Buster.Position.GetDistance2(Ghost.Position) - MinRangeToTrap - (MaxRangeToTrap - MinRangeToTrap) / 2;
                     targetPosition = Buster.Position.GetCloserPoint(Ghost.Position, targetDistance);
                 }
-                
-                NextAction = targetPosition.GetAction();
+
+                NextAction = targetPosition.GetAction2();
             }
         }
     }
@@ -249,7 +248,7 @@ namespace CodinGame.BotProgramming.CodeBusters
             }
 
 
-            var distance = Buster.Position.GetDistance(releasePoint);
+            var distance = Buster.Position.GetDistance2(releasePoint);
             TargetPosition = Buster.Position.GetCloserPoint(releasePoint, Math.Abs(distance - (ReleaseAreaRatio - ReleaseAreaRatioOffset)));
         }
 
@@ -263,7 +262,7 @@ namespace CodinGame.BotProgramming.CodeBusters
             }
             else
             {
-                NextAction = TargetPosition.GetAction();
+                NextAction = TargetPosition.GetAction2();
             }
         }
     }
@@ -288,13 +287,13 @@ namespace CodinGame.BotProgramming.CodeBusters
                 var targetEnemies = Board.GetEnemiesTrappingAGhost(ReferenceGhost, Enemies);
                 if (targetEnemies.Any())
                 {
-                    Enemy = targetEnemies.OrderBy(x => x.Position.GetDistance(Buster.Position)).First();
+                    Enemy = targetEnemies.OrderBy(x => x.Position.GetDistance2(Buster.Position)).First();
                 }
                 else
                 {
                     Enemy = Enemies
-                        .Where(x => x.Initialized && x.Position.GetDistance(Buster.Position) <= CodeBusters.Buster.Sight && !x.IsBeingChased)
-                        .OrderBy(x => x.Position.GetDistance(Buster.Position))
+                        .Where(x => x.Initialized && x.Position.GetDistance2(Buster.Position) <= BotProgramming.Buster.Sight && !x.IsBeingChased)
+                        .OrderBy(x => x.Position.GetDistance2(Buster.Position))
                         .FirstOrDefault();
                 }
 
@@ -310,7 +309,7 @@ namespace CodinGame.BotProgramming.CodeBusters
                 }
                 else
                 {
-                    NextAction = ReferenceGhost.Position.GetAction();
+                    NextAction = ReferenceGhost.Position.GetAction2();
                 }
             }
         }
@@ -322,29 +321,33 @@ namespace CodinGame.BotProgramming.CodeBusters
 
         public const int MaxAttempts = 3;
         public PlayerBuster Buster { get; protected set; }
-        public EnemyBuster Enemy { get; protected set; }
+        public EnemyBuster? Enemy { get; protected set; }
         public int Attempts { get; protected set; }
 
-        public StuntAction(int teamId, PlayerBuster buster, EnemyBuster enemy) : base(teamId)
+        public StuntAction(int teamId, PlayerBuster buster, EnemyBuster? enemy)
+            : base(teamId)
         {
             Buster = buster;
             Enemy = enemy;
             if (Enemy != null)
+            {
                 Enemy.IsBeingChased = true;
+            }
+
             Attempts = 0;
         }
 
         public override void Process()
         {
-            if (Attempts == MaxAttempts || Enemy.State == BusterState.Stunned || !Enemy.Initialized)
+            if (Enemy != null && (Attempts == MaxAttempts || Enemy.State == BusterState.Stunned || !Enemy.Initialized))
             {
-                Console.Error.WriteLine("Buster {0} gave up to stun Enemy {1}", Buster.Id, Enemy.Id);
+                Console.Error.WriteLine("Buster {0} gave up to stun Enemy {1}", Buster.Id, Enemy?.Id);
                 Buster.Reset();
-                Enemy.IsBeingChased = false;
+                Enemy!.IsBeingChased = false;
                 return;
             }
 
-            var distance = Buster.Position.GetDistance(Enemy.Position);
+            var distance = Buster.Position.GetDistance2(Enemy!.Position);
             if (distance < MinRangeToStunt)
             {
                 Buster.UseStun();
@@ -355,7 +358,7 @@ namespace CodinGame.BotProgramming.CodeBusters
             }
             else
             {
-                NextAction = Enemy.Position.GetAction();
+                NextAction = Enemy.Position.GetAction2();
                 Attempts++;
             }
         }
@@ -382,16 +385,11 @@ namespace CodinGame.BotProgramming.CodeBusters
             }
         }
 
-        public Action Action { get; set; }
+        public Action? Action { get; set; } = null!;
 
         public string NextAction
         {
-            get
-            {
-                return Action != null ?
-                    Action.GetAction() :
-                    Point.Empty.GetAction();
-            }
+            get { return Action != null ? Action.GetAction() : Point.Empty.GetAction2(); }
         }
 
         public bool IsIdle => Action == null && State == BusterState.IdleOrMovingBuster;
@@ -419,7 +417,7 @@ namespace CodinGame.BotProgramming.CodeBusters
 
         public bool WorthStunEnemy(EnemyBuster enemy)
         {
-            var distance = Position.GetDistance(enemy.Position);
+            var distance = Position.GetDistance2(enemy.Position);
             var stepsToStunt = distance / StuntAction.MinRangeToStunt;
             if (stepsToStunt <= 1)
                 return true;
@@ -432,8 +430,8 @@ namespace CodinGame.BotProgramming.CodeBusters
 
         public bool WorthTrapGhost(Ghost ghost)
         {
-            var distance = Position.GetDistance(ghost.Position);
-            return (ghost.Stamina > 8 || ghost.Stamina == 0|| ghost.BustersTryingToTrap == 0) && (distance / Speed) <= 5;
+            var distance = Position.GetDistance2(ghost.Position);
+            return (ghost.Stamina > 8 || ghost.Stamina == 0 || ghost.BustersTryingToTrap == 0) && (distance / Speed) <= 5;
         }
 
         public void Reset()
@@ -500,7 +498,9 @@ namespace CodinGame.BotProgramming.CodeBusters
     {
         public bool IsBeingChased { get; set; }
 
-        public EnemyBuster(int id) : base(id) { }
+        public EnemyBuster(int id) : base(id)
+        {
+        }
 
         public override string ToString()
         {
@@ -541,7 +541,10 @@ namespace CodinGame.BotProgramming.CodeBusters
         public int Id { get; set; }
         public Point Position { get; set; }
         public bool Initialized { get; set; }
-        public Entity() { }
+
+        public Entity()
+        {
+        }
 
         public void Merge(Entity entity)
         {
@@ -565,11 +568,11 @@ namespace CodinGame.BotProgramming.CodeBusters
 
         public int TeamId { get; private set; }
 
-        public IList<PlayerBuster> Busters { get; private set; }
+        public IList<PlayerBuster> Busters { get; private set; } = null!;
 
-        public IList<Ghost> Ghosts { get; private set; }
+        public IList<Ghost> Ghosts { get; private set; } = null!;
 
-        public IList<EnemyBuster> Enemies { get; private set; }
+        public IList<EnemyBuster> Enemies { get; private set; } = null!;
 
         public Board(int teamId, int totalBusters, int totalGhosts)
         {
@@ -729,7 +732,7 @@ namespace CodinGame.BotProgramming.CodeBusters
             if (busters.Count == 1)
             {
                 var buster = busters.First();
-                var trapAction = (TrapGhostAction)buster.Action;
+                var trapAction = (TrapGhostAction)buster.Action!;
                 if (!trapAction.Ghost.Initialized)
                     return;
 
@@ -752,6 +755,7 @@ namespace CodinGame.BotProgramming.CodeBusters
                         }
                     }
                 }
+
                 return;
             }
 
@@ -771,7 +775,7 @@ namespace CodinGame.BotProgramming.CodeBusters
                 //    continue;
 
                 var compatibleBusters = busters
-                    .Where(x => x.Id != buster.Id && x.Action is TrapGhostAction && ((TrapGhostAction) x.Action).Ghost.Id == trapAction.Ghost.Id)
+                    .Where(x => x.Id != buster.Id && x.Action is TrapGhostAction && ((TrapGhostAction)x.Action).Ghost.Id == trapAction.Ghost.Id)
                     .ToList();
 
                 var totalBusters = compatibleBusters.Count + 1;
@@ -802,7 +806,7 @@ namespace CodinGame.BotProgramming.CodeBusters
                     {
                         var enemy = enemies
                             .OrderBy(x => x.State == BusterState.CarryingGhost)
-                            .ThenBy(x => x.Position.GetDistance(buster.Position))
+                            .ThenBy(x => x.Position.GetDistance2(buster.Position))
                             .First();
 
                         buster.Action = new StuntAction(TeamId, buster, enemy);
@@ -819,7 +823,7 @@ namespace CodinGame.BotProgramming.CodeBusters
                         var enemy = enemies
                             .Where(x => !x.IsBeingChased)
                             .OrderBy(x => x.State == BusterState.CarryingGhost)
-                            .ThenBy(x => x.Position.GetDistance(compatibleBusters[i].Position))
+                            .ThenBy(x => x.Position.GetDistance2(compatibleBusters[i].Position))
                             .FirstOrDefault();
 
                         if (enemy != null)
@@ -835,7 +839,6 @@ namespace CodinGame.BotProgramming.CodeBusters
                     }
                 }
             }
-
         }
 
         private bool WorthStunEnemy(int totalEnemies, Ghost ghost)
@@ -846,7 +849,8 @@ namespace CodinGame.BotProgramming.CodeBusters
         public static IList<EnemyBuster> GetEnemiesTrappingAGhost(Ghost ghost, IList<EnemyBuster> enemies)
         {
             return enemies
-                .Where(x => x.Initialized && x.State == BusterState.TrappingAGhost && x.Position.GetDistance(ghost.Position) <= TrapGhostAction.MinRangeToTrap)
+                .Where(x => x.Initialized && x.State == BusterState.TrappingAGhost &&
+                            x.Position.GetDistance2(ghost.Position) <= TrapGhostAction.MinRangeToTrap)
                 .ToList();
         }
 
@@ -856,7 +860,7 @@ namespace CodinGame.BotProgramming.CodeBusters
             {
                 var buster = Busters
                     .Where(x => x.CanUseStun && x.WorthStunEnemy(enemy))
-                    .OrderBy(x => x.Position.GetDistance(enemy.Position))
+                    .OrderBy(x => x.Position.GetDistance2(enemy.Position))
                     .FirstOrDefault();
 
                 if (buster == null)
@@ -884,7 +888,7 @@ namespace CodinGame.BotProgramming.CodeBusters
                 while (busters.Any(x => x.WorthTrapGhost(ghost)))
                 {
                     var buster = busters.First();
-                    buster.Action = new TrapGhostAction(TeamId, buster, ghost, buster.Action);
+                    buster.Action = new TrapGhostAction(TeamId, buster, ghost, buster.Action!);
                     Console.Error.WriteLine("Buster {0} going to trap Ghost {1}", buster.Id, ghost.Id);
                     busters = GetAvailableBusters(ghost);
                 }
@@ -893,18 +897,18 @@ namespace CodinGame.BotProgramming.CodeBusters
 
         private IEnumerable<PlayerBuster> GetBustersTrappingAGhost(Ghost ghost)
         {
-            return 
+            return
                 from buster in Busters.Where(x => x.State == BusterState.TrappingAGhost && x.Action is TrapGhostAction)
                 let trapAction = buster.Action as TrapGhostAction
                 where trapAction.Ghost.Id == ghost.Id
                 select buster;
         }
 
-        private EnemyBuster GetEnemyWhoStun(PlayerBuster buster)
+        private EnemyBuster? GetEnemyWhoStun(PlayerBuster buster)
         {
             return Enemies
-                .Where(x => x.StunAvailable && x.Position.GetDistance(buster.Position) <= StuntAction.MinRangeToStunt)
-                .OrderBy(x => x.Position.GetDistance(buster.Position))
+                .Where(x => x.StunAvailable && x.Position.GetDistance2(buster.Position) <= StuntAction.MinRangeToStunt)
+                .OrderBy(x => x.Position.GetDistance2(buster.Position))
                 .FirstOrDefault();
         }
 
@@ -912,7 +916,7 @@ namespace CodinGame.BotProgramming.CodeBusters
         {
             return Busters
                 .Where(x => x.IsSearchingGhosts)
-                .OrderBy(x => x.Position.GetDistance(ghost.Position))
+                .OrderBy(x => x.Position.GetDistance2(ghost.Position))
                 .ToList();
         }
 
@@ -937,12 +941,12 @@ namespace CodinGame.BotProgramming.CodeBusters
 
     public static class Extensions
     {
-        public static double GetDistance(this Point point, Point targetPoint)
+        public static double GetDistance2(this Point point, Point targetPoint)
         {
             return Math.Sqrt(Math.Pow(targetPoint.X - point.X, 2) + Math.Pow(targetPoint.Y - point.Y, 2));
         }
 
-        public static string GetAction(this Point point)
+        public static string GetAction2(this Point point)
         {
             return string.Format("MOVE {0} {1}", point.X, point.Y);
         }
@@ -981,7 +985,7 @@ namespace CodinGame.BotProgramming.CodeBusters
         {
             var opposite = targetPoint.X - point.X;
             var adjacent = targetPoint.Y - point.Y;
-            var hypotenuse = point.GetDistance(targetPoint);
+            var hypotenuse = point.GetDistance2(targetPoint);
             var angle = Math.Asin(Math.Abs(opposite) / hypotenuse);
             var newOpposite = Math.Sin(angle) * distanceToCloserPoint;
             var newAdjacent = Math.Cos(angle) * distanceToCloserPoint;

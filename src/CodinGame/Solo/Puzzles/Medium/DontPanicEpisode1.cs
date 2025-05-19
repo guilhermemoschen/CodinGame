@@ -11,18 +11,18 @@ namespace Codingame.TheParanoidAndroid
     {
         static void Main(string[] args)
         {
-            var game = new Game(Console.ReadLine());
+            var game = new Game(Console.ReadLine()!);
 
             for (var i = 0; i < game.AmountOfElevators; i++)
             {
-                game.AddElevatorPosition(Console.ReadLine());
+                game.AddElevatorPosition(Console.ReadLine()!);
             }
 
             Console.Error.WriteLine(game);
 
             while (true)
             {
-                var leadClone = new ClonePosition(Console.ReadLine());
+                var leadClone = new ClonePosition(Console.ReadLine()!);
                 Console.Error.WriteLine(leadClone);
 
                 if (!game.IsCalculated)

@@ -17,21 +17,21 @@ class HeatDetector
     static void Main(string[] args)
     {
         string[] inputs;
-        inputs = Console.ReadLine().Split(' ');
+        inputs = Console.ReadLine()!.Split(' ');
         int W = int.Parse(inputs[0]); // width of the building.
         int H = int.Parse(inputs[1]); // height of the building.
         
         buildingArea = new Rectangle(0, 0, W, H);
         Console.Error.WriteLine("buildingArea {0}", buildingArea);
         var possibleBombPoistion = new Rectangle(0, 0, W, H);
-        int N = int.Parse(Console.ReadLine()); // maximum number of turns before game over.
-        inputs = Console.ReadLine().Split(' ');
+        int N = int.Parse(Console.ReadLine()!); // maximum number of turns before game over.
+        inputs = Console.ReadLine()!.Split(' ');
         var batmanPosition = new Point(int.Parse(inputs[0]), int.Parse(inputs[1]));
 
         // game loop
         while (true)
         {
-            var bombDirection = Console.ReadLine(); // the direction of the bombs from batman's current location (U, UR, R, DR, D, DL, L or UL)
+            var bombDirection = Console.ReadLine()!; // the direction of the bombs from batman's current location (U, UR, R, DR, D, DL, L or UL)
 
             possibleBombPoistion = GetNewPossibleBombPosition(bombDirection, possibleBombPoistion, batmanPosition);
             Console.Error.WriteLine("possibleBombPoistion {0}", possibleBombPoistion);

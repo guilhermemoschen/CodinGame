@@ -10,11 +10,11 @@ using System.Collections.Generic;
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
-class PowerofThor
+class PowerOfThorEpisode1
 {
     static void Main(string[] args)
     {
-        string[] inputs = Console.ReadLine().Split(' ');
+        string[] inputs = Console.ReadLine()!.Split(' ');
         var lightPoint = new Point(int.Parse(inputs[0]), int.Parse(inputs[1]));
         var thorPoint = new Point(int.Parse(inputs[2]), int.Parse(inputs[3]));
 
@@ -24,7 +24,7 @@ class PowerofThor
         // game loop
         while (true)
         {
-            int E = int.Parse(Console.ReadLine()); // The level of Thor's remaining energy, representing the number of moves he can still make.
+            int E = int.Parse(Console.ReadLine()!); // The level of Thor's remaining energy, representing the number of moves he can still make.
             var angule = GetAngule(thorPoint, lightPoint);
             var direction = GetDirection(angule);
             Console.WriteLine(direction); // A single line providing the move to be made: N NE E SE S SW W or NW
@@ -32,7 +32,7 @@ class PowerofThor
         }
     }
 
-    static void UpdateThorLocation(string direction, ref Point thorPoint)
+    static void UpdateThorLocation(string? direction, ref Point thorPoint)
     {
         switch (direction)
         {
@@ -67,7 +67,7 @@ class PowerofThor
         }
     }
 
-    static string GetDirection(double angule)
+    static string? GetDirection(double angule)
     {
         var a = Convert.ToInt32(angule);
         if (a < 0)

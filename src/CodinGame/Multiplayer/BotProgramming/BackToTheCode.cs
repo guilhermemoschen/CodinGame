@@ -1,29 +1,32 @@
-﻿using System.Collections.ObjectModel;
-using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 
 namespace Codingame.BackToTheCode.Version4
 {
-    public class Program
+    public static class BackToTheCode
     {
         static void Main(string[] args)
         {
-            var opponentsInput = new string[Convert.ToInt32(Console.ReadLine())];
+            var opponentsInput = new string[Convert.ToInt32(Console.ReadLine()!)];
             var game = new Game();
 
             while (true)
             {
-                game.UpdateGameRound(Console.ReadLine());
-                game.UpdatePlayer(Console.ReadLine());
+                game.UpdateGameRound(Console.ReadLine()!);
+                game.UpdatePlayer(Console.ReadLine()!);
 
                 for (var i = 0; i < opponentsInput.Length; i++)
-                    opponentsInput[i] = Console.ReadLine();
+                    opponentsInput[i] = Console.ReadLine()!;
 
                 game.UpdateOpponents(opponentsInput);
 
                 var rows = new Collection<string>();
                 for (var i = 0; i < 20; i++)
-                    rows.Add(Console.ReadLine());
+                    rows.Add(Console.ReadLine()!);
 
                 game.UpdateBoard(rows);
 
@@ -52,10 +55,10 @@ namespace Codingame.BackToTheCode.Version4
         public const int ExpansionOffset = 1;
 
         protected Rectangle TargetRectangle;
-        protected Board Board;
+        protected Board Board = null!;
         protected int GameRound;
-        protected Player Player;
-        protected IList<Opponent> Opponents;
+        protected Player Player = null!;
+        protected IList<Opponent> Opponents = null!;
         protected GameStatus Status;
         protected Strategy CurrentStrategy;
 
@@ -125,11 +128,11 @@ namespace Codingame.BackToTheCode.Version4
 
     public abstract class Strategy
     {
-        public Board Board { get; set; }
-        public Player Player { get; set; }
+        public Board Board { get; set; } = null!;
+        public Player Player { get; set; } = null!;
         public IList<Opponent> Opponents { get; protected set; }
 
-        protected Dictionary<int, bool> OpponentsBackInTimeUsage; 
+        protected Dictionary<int, bool> OpponentsBackInTimeUsage;
 
         public int GameRound { get; protected set; }
         protected int LastGameRound;
@@ -153,10 +156,12 @@ namespace Codingame.BackToTheCode.Version4
             Opponents = opponents;
         }
 
-        protected string GetNextExistentAction()
+        protected string? GetNextExistentAction()
         {
             if (!NextPoints.Any())
+            {
                 return null;
+            }
 
             var nextPoint = NextPoints.First();
             if (nextPoint != Player.Position)
@@ -187,12 +192,12 @@ namespace Codingame.BackToTheCode.Version4
 
         protected abstract Point GetNextNextFreePosition();
 
-        public string GetNextAction()
+        public string? GetNextAction()
         {
             return GetNextExistentAction() ?? DefineNextAction();
         }
 
-        protected virtual string DefineNextAction()
+        protected virtual string? DefineNextAction()
         {
             return null;
         }
@@ -256,6 +261,7 @@ namespace Codingame.BackToTheCode.Version4
                 {
                     path.Add(new Point(initialReference.X + (rectangle.Width - 1), rectangle.Y + (rectangle.Height - 1)));
                 }
+
                 lastPoint.X++;
             }
 
@@ -326,16 +332,14 @@ namespace Codingame.BackToTheCode.Version4
                 .Where(x => x.Position != Player.Position)
                 .OrderBy(x => x.Position.GetDistance(Player.Position));
 
-            return nodes.Any() ?
-                nodes.First().Position :
-                Board.EmptyPoint;
+            return nodes.Any() ? nodes.First().Position : Board.EmptyPoint;
         }
 
         public void UpdateOpponent(int number, string input)
         {
             var usedBackInTime = false;
             var opponent = Opponents.FirstOrDefault(x => x.Number == number);
-            
+
             if (opponent != null)
             {
                 opponent.Update(input);
@@ -396,7 +400,7 @@ namespace Codingame.BackToTheCode.Version4
             return neutralNodes.Skip(1).First().Position;
         }
 
-        protected override string DefineNextAction()
+        protected override string? DefineNextAction()
         {
             Console.Error.WriteLine(Status);
 
@@ -416,7 +420,7 @@ namespace Codingame.BackToTheCode.Version4
                         ChangeStatus(StrategyStatus.FindingNewRow);
                         return DefineNextAction();
                     }
-                    
+
                     nextPosition = GetClosestNeutralPositionForRectangle(CurrrentRectangle);
                     if (nextPosition.IsRealEmpty())
                     {
@@ -434,6 +438,7 @@ namespace Codingame.BackToTheCode.Version4
 
                         nextPosition = GetClosestNeutralPositionForRectangle(CurrrentRectangle);
                     }
+
                     break;
 
                 case StrategyStatus.CreatingRectangle:
@@ -451,6 +456,7 @@ namespace Codingame.BackToTheCode.Version4
                                 CurrrentRectangle = ExpandRectangle(CurrrentRectangle, Game.ExpansionOffset);
                                 Console.Error.WriteLine("Expanded to {0}", CurrrentRectangle);
                             }
+
                             nextPosition = GetClosestNeutralPositionForRectangle(CurrrentRectangle);
                             if (nextPosition.IsRealEmpty())
                             {
@@ -466,6 +472,7 @@ namespace Codingame.BackToTheCode.Version4
                         ChangeStatus(StrategyStatus.FindingNewRow);
                         return DefineNextAction();
                     }
+
                     break;
 
                 case StrategyStatus.FindingNewRow:
@@ -487,6 +494,7 @@ namespace Codingame.BackToTheCode.Version4
                         nextPosition = GetFirstPositionForRectangle(CurrrentRectangle);
                         Console.Error.WriteLine("GetFirstPositionForRectangle {0}", nextPosition);
                     }
+
                     break;
             }
 
@@ -501,24 +509,24 @@ namespace Codingame.BackToTheCode.Version4
             switch (Player.Direction)
             {
                 case Direction.Right:
-                    return rectangle.GetRightX() != Board.Width - 1 && 
-                        Board.IsEmptyColumn(rectangle.GetRightX() + 1) &&
-                        rectangle.Width < 13;
-                
+                    return rectangle.GetRightX() != Board.Width - 1 &&
+                           Board.IsEmptyColumn(rectangle.GetRightX() + 1) &&
+                           rectangle.Width < 13;
+
                 case Direction.Left:
                     return rectangle.X != 0 &&
-                        Board.IsEmptyColumn(rectangle.X - 1) &&
-                        rectangle.Width < 13;
-                
+                           Board.IsEmptyColumn(rectangle.X - 1) &&
+                           rectangle.Width < 13;
+
                 case Direction.Up:
                     return rectangle.Y != 0 &&
-                        Board.IsEmptyRow(rectangle.Y - 1) &&
-                        rectangle.Height < 10;
-                
+                           Board.IsEmptyRow(rectangle.Y - 1) &&
+                           rectangle.Height < 10;
+
                 case Direction.Down:
-                    return rectangle.GetBottomY() != Board.Height - 1 && 
-                        Board.IsEmptyRow(rectangle.GetBottomY() + 1) &&
-                        rectangle.Height < 10;
+                    return rectangle.GetBottomY() != Board.Height - 1 &&
+                           Board.IsEmptyRow(rectangle.GetBottomY() + 1) &&
+                           rectangle.Height < 10;
 
                 default:
                     return false;
@@ -531,30 +539,30 @@ namespace Codingame.BackToTheCode.Version4
 
             if (Board.IsBottomEdgeFilled(rectangle))
             {
-                return center.X > Board.Width - center.X ? 
-                    new Point(rectangle.GetRightX(), rectangle.GetBottomY() - 1) :
-                    new Point(rectangle.X, rectangle.GetBottomY() - 1);
+                return center.X > Board.Width - center.X
+                    ? new Point(rectangle.GetRightX(), rectangle.GetBottomY() - 1)
+                    : new Point(rectangle.X, rectangle.GetBottomY() - 1);
             }
 
             if (Board.IsTopEdgeFilled(rectangle))
             {
-                return center.X > Board.Width - center.X ?
-                    new Point(rectangle.GetRightX(), rectangle.Y + 1) :
-                    new Point(rectangle.X, rectangle.Y + 1);
+                return center.X > Board.Width - center.X
+                    ? new Point(rectangle.GetRightX(), rectangle.Y + 1)
+                    : new Point(rectangle.X, rectangle.Y + 1);
             }
 
             if (Board.IsLeftEdgeFilled(rectangle))
             {
-                return center.Y > Board.Height - center.Y ?
-                    new Point(rectangle.X + 1, rectangle.GetBottomY()) :
-                    new Point(rectangle.X + 1, rectangle.Y);
+                return center.Y > Board.Height - center.Y
+                    ? new Point(rectangle.X + 1, rectangle.GetBottomY())
+                    : new Point(rectangle.X + 1, rectangle.Y);
             }
 
             if (Board.IsRightEdgeFilled(rectangle))
             {
-                return center.Y > Board.Height - center.Y ?
-                    new Point(rectangle.GetRightX() - 1, rectangle.GetBottomY()) :
-                    new Point(rectangle.GetRightX() - 1, rectangle.Y);
+                return center.Y > Board.Height - center.Y
+                    ? new Point(rectangle.GetRightX() - 1, rectangle.GetBottomY())
+                    : new Point(rectangle.GetRightX() - 1, rectangle.Y);
             }
 
             return GetClosestNeutralPositionForRectangle(CurrrentRectangle);
@@ -632,7 +640,7 @@ namespace Codingame.BackToTheCode.Version4
                 Console.Error.WriteLine("Not in a corner");
                 return false;
             }
-            
+
             var newRectangle = ExpandRectangle(CurrrentRectangle, Game.ExpansionOffset);
 
             if (!Board.IsValidRectangle(newRectangle))
@@ -719,7 +727,7 @@ namespace Codingame.BackToTheCode.Version4
                 Console.Error.WriteLine("Opponent target node is already filled");
                 return false;
             }
-                
+
             var opponentRoundsToHit = closestOpponent.GetRoundsToHit(rectangle);
             var roundsToCloseOpponentPath = Player.Position.GetRoundsToGoToPoint(closestPointToHit);
 
@@ -871,7 +879,6 @@ namespace Codingame.BackToTheCode.Version4
             // Vertical
             if (row.Width == 1)
             {
-
                 // validate left
                 if (row.X - 1 >= 0)
                 {
@@ -955,7 +962,7 @@ namespace Codingame.BackToTheCode.Version4
                         rectangles.Add(expandedRectanle);
                         continue;
                     }
-                    
+
                     expandedRectanle = rectangle.Clone().ExpandToRight(Game.ExpansionOffset);
                     if (expandedRectanle.GetRightX() < Width && IsRightEdgeFilled(expandedRectanle))
                     {
@@ -1280,7 +1287,7 @@ namespace Codingame.BackToTheCode.Version4
                         bestPath.Add(new Point(rectangle.X + rectangleOffset, rectangle.Y));
                         bestPath.Add(new Point(rectangle.X + rectangleOffset, rectangle.Y + rectangleOffset));
                     }
-                    else  // Rectangle at left
+                    else // Rectangle at left
                     {
                         bestPath.Add(new Point(rectangle.X, rectangle.Y));
                         bestPath.Add(new Point(rectangle.X, rectangle.Y + rectangleOffset));
@@ -1288,12 +1295,12 @@ namespace Codingame.BackToTheCode.Version4
                 }
                 else if (startPoint.Y == rectangle.Y + rectangleOffset) // Rectangle in the top of startPoint
                 {
-                    if (startPoint.X == rectangle.X)  // Rectangle at right
+                    if (startPoint.X == rectangle.X) // Rectangle at right
                     {
                         bestPath.Add(new Point(rectangle.X + rectangleOffset, rectangle.Y + rectangleOffset));
                         bestPath.Add(new Point(rectangle.X + rectangleOffset, rectangle.Y));
                     }
-                    else  // Rectangle at left
+                    else // Rectangle at left
                     {
                         bestPath.Add(new Point(rectangle.X, rectangle.Y + rectangleOffset));
                         bestPath.Add(new Point(rectangle.X, rectangle.Y));
@@ -1321,7 +1328,6 @@ namespace Codingame.BackToTheCode.Version4
                     {
                         bestPath.Add(new Point(rectangle.X + rectangleOffset, rectangle.Y + rectangleOffset));
                         bestPath.Add(new Point(rectangle.X, rectangle.Y + rectangleOffset));
-
                     }
                     else // Rectangle at top
                     {
@@ -1384,12 +1390,12 @@ namespace Codingame.BackToTheCode.Version4
             return nodes;
         }
 
-        public IList<Node> GetAllEdgeNodesByRectangleAndPlayer(Rectangle rectangle, Point playerPosition)
+        public IList<Node>? GetAllEdgeNodesByRectangleAndPlayer(Rectangle rectangle, Point playerPosition)
         {
-            IList<Node> left = null;
-            IList<Node> right = null;
-            IList<Node> top = null;
-            IList<Node> bottom = null;
+            IList<Node>? left = null;
+            IList<Node>? right = null;
+            IList<Node>? top = null;
+            IList<Node>? bottom = null;
 
             if (IsLeftEdgeFilled(rectangle))
             {
@@ -1419,7 +1425,7 @@ namespace Codingame.BackToTheCode.Version4
                     bottom.Add(Nodes[x, rectangle.Y + rectangle.Height]);
             }
 
-            IList<Node> selected = null;
+            IList<Node>? selected = null;
 
             if (left != null)
                 selected = left;
@@ -1462,11 +1468,11 @@ namespace Codingame.BackToTheCode.Version4
                 }
             }
 
-            var firstPoint = selected.First().Position;
-            var lastPoint = selected.Last().Position;
-            return playerPosition.GetDistance(firstPoint) > playerPosition.GetDistance(lastPoint) ?
-                selected.Reverse().ToList() :
-                selected;
+            var firstPoint = selected?.First().Position;
+            var lastPoint = selected?.Last().Position;
+            return playerPosition.GetDistance(firstPoint ?? new Point()) > playerPosition.GetDistance(lastPoint ?? new Point())
+                ? selected?.Reverse().ToList()
+                : selected;
         }
 
         public void ShowBoardStatus()
@@ -1530,9 +1536,10 @@ namespace Codingame.BackToTheCode.Version4
 
     public class Player : Character
     {
-        public Player(string input, Direction direction = Direction.None, bool usedBackInTime = false, IList<Point> actionHistory = null)
+        public Player(string input, Direction direction = Direction.None, bool usedBackInTime = false, IList<Point>? actionHistory = null)
             : base(input, direction, usedBackInTime, actionHistory)
-        { }
+        {
+        }
 
         public Player(string input)
         {
@@ -1555,7 +1562,7 @@ namespace Codingame.BackToTheCode.Version4
         public Direction Direction { get; protected set; }
         public IList<Point> ActionsHistory { get; protected set; }
 
-        protected Character(string input, Direction direction, bool usedBackInTime, IList<Point> actionHistory)
+        protected Character(string input, Direction direction, bool usedBackInTime, IList<Point>? actionHistory)
             : this()
         {
             if (actionHistory != null)
@@ -1608,9 +1615,10 @@ namespace Codingame.BackToTheCode.Version4
     {
         public int Number { get; protected set; }
 
-        public Opponent(string input, Direction direction = Direction.None, bool usedBackInTime = false, IList<Point> actionHistory = null)
+        public Opponent(string input, Direction direction = Direction.None, bool usedBackInTime = false, IList<Point>? actionHistory = null)
             : base(input, direction, usedBackInTime, actionHistory)
-        { }
+        {
+        }
 
         public Opponent(int number, string input)
             : base()
@@ -1810,7 +1818,7 @@ namespace Codingame.BackToTheCode.Version4
             {
                 if (rectangle.X > targetPoint.X)
                     return new Point(rectangle.X, targetPoint.Y);
-                
+
                 if (rectangle.GetRightX() < targetPoint.X)
                     return new Point(rectangle.GetRightX(), targetPoint.Y);
             }
@@ -1826,7 +1834,7 @@ namespace Codingame.BackToTheCode.Version4
             {
                 if (rectangle.X > targetPoint.X && rectangle.Y > targetPoint.Y) // top left
                     return new Point(rectangle.X, rectangle.Y);
-                
+
                 if (rectangle.GetRightX() < targetPoint.X && rectangle.Y > targetPoint.Y) // top right
                     return new Point(rectangle.GetRightX(), rectangle.Y);
 
@@ -1842,7 +1850,7 @@ namespace Codingame.BackToTheCode.Version4
 
         public static bool IsOutOfBounds(this Rectangle rectangle)
         {
-            return 
+            return
                 rectangle.X < 0 || rectangle.X >= Board.Width || rectangle.GetRightX() >= Board.Width ||
                 rectangle.Y < 0 || rectangle.Y >= Board.Height || rectangle.GetBottomY() >= Board.Height;
         }

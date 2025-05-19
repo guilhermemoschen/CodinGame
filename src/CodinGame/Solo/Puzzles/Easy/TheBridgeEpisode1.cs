@@ -10,19 +10,19 @@ using System.Collections.Generic;
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
-class Player
+public class TheBridgeEpisode1
 {
     static void Main(string[] args)
     {
-        var spaceBeforeGap = int.Parse(Console.ReadLine()); // the length of the road before the gap.
-        var gapSize = int.Parse(Console.ReadLine()); // the length of the gap.
-        var landingSpace = int.Parse(Console.ReadLine()); // the length of the landing platform.
+        var spaceBeforeGap = int.Parse(Console.ReadLine()!); // the length of the road before the gap.
+        var gapSize = int.Parse(Console.ReadLine()!); // the length of the gap.
+        var landingSpace = int.Parse(Console.ReadLine()!); // the length of the landing platform.
 
         // game loop
         while (true)
         {
-            int currentSpeed = int.Parse(Console.ReadLine()); // the motorbike's speed.
-            int currentPossition = int.Parse(Console.ReadLine()); // the position on the road of the motorbike.
+            int currentSpeed = int.Parse(Console.ReadLine()!); // the motorbike's speed.
+            int currentPossition = int.Parse(Console.ReadLine()!); // the position on the road of the motorbike.
 
             Console.Error.WriteLine("Current Position {0}", currentPossition);
             Console.Error.WriteLine("gapSize {0}", gapSize);

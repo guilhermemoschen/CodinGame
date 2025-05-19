@@ -15,14 +15,14 @@ class Temperature
     public const int MinNegative = -273;
     static void Main(string[] args)
     {
-        int N = int.Parse(Console.ReadLine()); // the number of temperatures to analyse
+        int N = int.Parse(Console.ReadLine()!); // the number of temperatures to analyse
         if (N == 0)
         {
             Console.WriteLine(0);
             return;
         }
 
-        string TEMPS = Console.ReadLine(); // the N temperatures expressed as integers ranging from -273 to 5526
+        string TEMPS = Console.ReadLine()!; // the N temperatures expressed as integers ranging from -273 to 5526
 
         // To debug: Console.Error.WriteLine("Debug messages...");
 

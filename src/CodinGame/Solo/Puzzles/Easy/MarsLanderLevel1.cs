@@ -18,16 +18,16 @@ class MarsLanderLevel1
         var flatSurface = new List<Point>();
         
         string[] inputs;
-        var totalSurfacePoints = int.Parse(Console.ReadLine()); // the number of points used to draw the surface of Mars.
+        var totalSurfacePoints = int.Parse(Console.ReadLine()!); // the number of points used to draw the surface of Mars.
 
         for (var i = 0; i < totalSurfacePoints; i++)
         {
-            inputs = Console.ReadLine().Split(' ');
+            inputs = Console.ReadLine()!.Split(' ');
             var currentPoint = new Point(int.Parse(inputs[0]), int.Parse(inputs[1]));
 
             if (marsSurface.Count > 0 && currentPoint.Y == marsSurface.LastOrDefault().Y)
             {
-                // flast Surface
+                // flat Surface
                 flatSurface.Add(marsSurface.LastOrDefault());
                 flatSurface.Add(currentPoint);
             }
@@ -38,7 +38,7 @@ class MarsLanderLevel1
         // game loop
         while (true)
         {
-            inputs = Console.ReadLine().Split(' ');
+            inputs = Console.ReadLine()!.Split(' ');
 
             var opportunityPosition = new Point(int.Parse(inputs[0]), int.Parse(inputs[1]));
             var horizontalSpeed = int.Parse(inputs[2]); // the horizontal speed (in m/s), can be negative.

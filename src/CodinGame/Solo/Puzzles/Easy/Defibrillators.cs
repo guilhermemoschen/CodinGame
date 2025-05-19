@@ -10,19 +10,19 @@ using System.Collections.Generic;
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
-class Solution
+public static class Defibrillators
 {
     static void Main(string[] args)
     {
-        var userLongitude = Convert.ToDouble(Console.ReadLine().Replace(",", "."));
-        var userLatitude = Convert.ToDouble(Console.ReadLine().Replace(",", "."));
+        var userLongitude = Convert.ToDouble(Console.ReadLine()!.Replace(",", "."));
+        var userLatitude = Convert.ToDouble(Console.ReadLine()!.Replace(",", "."));
         var userChoice = string.Empty;
         var lowestDistance = -1.0;
 
-        int N = int.Parse(Console.ReadLine());
+        int N = int.Parse(Console.ReadLine()!);
         for (int i = 0; i < N; i++)
         {
-            var info = Console.ReadLine().Split(';');
+            var info = Console.ReadLine()!.Split(';');
             var longitude = Convert.ToDouble(info[4].Replace(",", "."));
             var latitude = Convert.ToDouble(info[5].Replace(",", "."));
             var distance = CalculateDistance3(userLatitude, userLongitude, latitude, longitude);

@@ -17,11 +17,11 @@ class MimeTypes
         var dictionary = new Dictionary<string, string>();
         var files = new List<string>();
 
-        int N = int.Parse(Console.ReadLine()); // Number of elements which make up the association table.
-        int Q = int.Parse(Console.ReadLine()); // Number Q of file names to be analyzed.
+        int N = int.Parse(Console.ReadLine()!); // Number of elements which make up the association table.
+        int Q = int.Parse(Console.ReadLine()!); // Number Q of file names to be analyzed.
         for (var i = 0; i < N; i++)
         {
-            string[] inputs = Console.ReadLine().Split(' ');
+            string[] inputs = Console.ReadLine()!.Split(' ');
             dictionary.Add("." + inputs[0].ToUpper(), inputs[1]);
             //string EXT = ; // file extension
             //string MT = ; // MIME type.
@@ -29,7 +29,7 @@ class MimeTypes
         
         for (var i = 0; i < Q; i++)
         {
-            files.Add(Console.ReadLine().ToUpper());
+            files.Add(Console.ReadLine()!.ToUpper());
             //string FNAME = ; // One file name per line.
         }
 

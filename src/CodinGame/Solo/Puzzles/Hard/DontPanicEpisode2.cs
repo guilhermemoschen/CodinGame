@@ -24,7 +24,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
             string input;
             if (args.Length == 0)
             {
-                input = Console.ReadLine();
+                input = Console.ReadLine()!;
                 Console.Error.WriteLine(input);
             }
             else
@@ -40,7 +40,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
             {
                 for (var i = 0; i < game.AmountOfElevators; i++)
                 {
-                    var elevatorInput = Console.ReadLine();
+                    var elevatorInput = Console.ReadLine()!;
                     Console.Error.WriteLine(elevatorInput);
                     game.AddElevatorPosition(elevatorInput);
                 }
@@ -58,7 +58,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 Clone leadClone;
                 if (args.Length == 0)
                 {
-                    var leadCloneInput = Console.ReadLine();
+                    var leadCloneInput = Console.ReadLine()!;
                     //Console.Error.WriteLine(leadCloneInput);
                     leadClone = new Clone(leadCloneInput);
                 }
@@ -90,17 +90,20 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
     {
         public int AmountOfFloors { get; set; }
         public Point ExitPosition { get; set; }
-        public Clone InitialClone { get; set; }
+        public Clone InitialClone { get; set; } = null!;
         public int AmountOfAdditionalElevators { get; set; }
         public int AmountOfElevators { get; set; }
         public IList<Point> ElevatorsPositions { get; set; }
         public int BoardWidth { get; set; }
         public int MaxActions { get; set; }
         public int TotalClones { get; set; }
-        public Board Board { get; set; }
+        public Board Board { get; set; } = null!;
         public ICollection<CloneAction> Actions { get; set; }
 
-        public bool IsCalculated { get { return Board != null; } }
+        public bool IsCalculated
+        {
+            get { return Board != null; }
+        }
 
         public static Dictionary<string, Test> Tests = new Dictionary<string, Test>();
 
@@ -121,7 +124,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 new Test()
                 {
                     BoardSettings = "6 13 100 5 1 10 2 3",
-                    Elevators = new Collection<string> { "2 7", "0 4", "4 1",  },
+                    Elevators = new Collection<string> { "2 7", "0 4", "4 1", },
                     FirstClone = "0 10 RIGHT"
                 }
             );
@@ -131,7 +134,8 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 new Test()
                 {
                     BoardSettings = "10 19 47 9 9 41 0 17",
-                    Elevators = new Collection<string> { "0 9", "5 4", "2 9", "6 9", "0 3", "7 4", "5 17", "3 17", "2 3", "4 9", "8 9", "7 17", "4 3", "1 17", "1 4", "3 4", "6 3" },
+                    Elevators = new Collection<string>
+                        { "0 9", "5 4", "2 9", "6 9", "0 3", "7 4", "5 17", "3 17", "2 3", "4 9", "8 9", "7 17", "4 3", "1 17", "1 4", "3 4", "6 3" },
                     FirstClone = "0 6 RIGHT"
                 }
             );
@@ -141,7 +145,8 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 new Test()
                 {
                     BoardSettings = "10 19 42 9 9 41 1 16",
-                    Elevators = new Collection<string> { "0 9", "5 4", "2 9", "6 9", "0 3", "7 4", "5 17", "3 17", "2 3", "4 9", "8 9", "7 17", "4 3", "1 17", "1 4", "6 3" },
+                    Elevators = new Collection<string>
+                        { "0 9", "5 4", "2 9", "6 9", "0 3", "7 4", "5 17", "3 17", "2 3", "4 9", "8 9", "7 17", "4 3", "1 17", "1 4", "6 3" },
                     FirstClone = "0 6 RIGHT"
                 }
             );
@@ -151,7 +156,12 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 new Test()
                 {
                     BoardSettings = "13 36 67 11 12 41 4 34",
-                    Elevators = new Collection<string> { "2 34", "5 34", "4 9", "8 23", "0 34", "4 23", "8 1", "10 3", "6 34", "3 17", "4 34", "5 4", "11 13", "7 34", "9 34", "11 11", "1 34", "7 17", "6 13", "1 4", "2 24", "8 9", "1 17", "11 4", "6 22", "1 24", "10 23", "3 34", "9 17", "2 3", "8 34", "2 23", "10 34", "9 2" },
+                    Elevators = new Collection<string>
+                    {
+                        "2 34", "5 34", "4 9", "8 23", "0 34", "4 23", "8 1", "10 3", "6 34", "3 17", "4 34", "5 4", "11 13", "7 34", "9 34", "11 11",
+                        "1 34", "7 17", "6 13", "1 4", "2 24", "8 9", "1 17", "11 4", "6 22", "1 24", "10 23", "3 34", "9 17", "2 3", "8 34", "2 23",
+                        "10 34", "9 2"
+                    },
                     FirstClone = "0 6 RIGHT"
                 }
             );
@@ -161,7 +171,11 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 new Test()
                 {
                     BoardSettings = "13 69 79 11 39 8 5 30",
-                    Elevators = new Collection<string> { "5 46", "8 66", "5 4", "10 23", "1 50", "10 3", "1 34", "8 34", "6 65", "3 17", "11 42", "7 17", "8 23", "8 56", "11 13", "2 58", "8 9", "1 4", "11 11", "1 24", "1 17", "6 13", "2 24", "8 1", "11 38", "2 23", "2 3", "6 57", "11 4", "6 34" },
+                    Elevators = new Collection<string>
+                    {
+                        "5 46", "8 66", "5 4", "10 23", "1 50", "10 3", "1 34", "8 34", "6 65", "3 17", "11 42", "7 17", "8 23", "8 56", "11 13",
+                        "2 58", "8 9", "1 4", "11 11", "1 24", "1 17", "6 13", "2 24", "8 1", "11 38", "2 23", "2 3", "6 57", "11 4", "6 34"
+                    },
                     FirstClone = "0 33 RIGHT"
                 }
             );
@@ -210,7 +224,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 ExitPosition);
         }
 
-        public string GetNextAction()
+        public string? GetNextAction()
         {
             if (Actions.Any())
             {
@@ -218,6 +232,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 Actions.Remove(nextAction);
                 return nextAction.ToString().ToUpper();
             }
+
             return null;
         }
 
@@ -236,18 +251,19 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 Console.Error.WriteLine("Couldn't calculate all actions.");
         }
 
-        public ICollection<CloneAction> CalculateNextAction(int additionalElevatorsLeft, int clonesLeft, ICollection<CloneAction> actions, Clone currentClone)
+        public ICollection<CloneAction> CalculateNextAction(int additionalElevatorsLeft, int clonesLeft, ICollection<CloneAction> actions,
+            Clone currentClone)
         {
             if (MaxActions <= actions.Count || clonesLeft < 0)
-                return null;
+                return new List<CloneAction>();
 
             if (currentClone.Position.X == 23 && currentClone.Position.Y == 11)
             {
-
             }
 
-            if (currentClone.Position.X < 0 || currentClone.Position.X >= BoardWidth || currentClone.Position.Y < 0 || currentClone.Position.Y >= AmountOfFloors)
-                return null;
+            if (currentClone.Position.X < 0 || currentClone.Position.X >= BoardWidth || currentClone.Position.Y < 0 ||
+                currentClone.Position.Y >= AmountOfFloors)
+                return new List<CloneAction>();
 
             ICollection<CloneAction> allActions;
             List<CloneAction> newActions;
@@ -259,9 +275,9 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                 newActions = CreateNewActionList(actions, GetActionsToReachNode(currentClone, exitPoint));
                 newActions.Add(CloneAction.Wait);
 
-                return newActions.Count > MaxActions ? 
-                    null : 
-                    newActions;
+                return newActions.Count > MaxActions
+                    ? new List<CloneAction>()
+                    : newActions;
             }
 
             var elevators = GetNodesByTypeAndFloor(NodeType.Elevator, currentClone.Position.Y);
@@ -288,7 +304,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
             {
                 if (IsExitPointInNextFloor(currentClone.Position))
                 {
-                    var targetNode = Board.Nodes[ExitPosition.X, ExitPosition.Y -1];
+                    var targetNode = Board.Nodes[ExitPosition.X, ExitPosition.Y - 1];
                     if (CanGoToPoint(currentClone.Position, targetNode.Position))
                     {
                         newActions = CreateNewActionList(actions, GetActionsToReachNode(currentClone, targetNode));
@@ -313,7 +329,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                         if (nextNode.Type == NodeType.Empty)
                             targetNodes.Add(nextNode);
                     }
-                    
+
                     if (currentClone.Position.X < BoardWidth - 1)
                     {
                         var previewNode = Board.Nodes[currentClone.Position.X - 1, currentClone.Position.Y];
@@ -333,7 +349,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
                         return allActions;
                 }
             }
-            
+
             //// Can go right
             //var distanceNextElevatorToRight = GetDistanceFromNextNodeType(NodeType.Elevator, currentClone.Position, CloneDirection.Right);
 
@@ -355,7 +371,7 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
             //    if (allActions != null)
             //        return allActions;
             //}
-            
+
             //if (distanceNextElevatorToRight != -1)
             //{
             //    newActions = new List<CloneAction>(actions);
@@ -399,8 +415,8 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
             //    if (allActions != null)
             //        return allActions;
             //}
-            
-            return null;
+
+            return new List<CloneAction>();
         }
 
         private bool IsElevatorAbove(Point currentPosition)
@@ -518,8 +534,8 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
         {
             return new Collection<CloneAction>
             {
-                CloneAction.Block, 
-                CloneAction.Wait, 
+                CloneAction.Block,
+                CloneAction.Wait,
                 CloneAction.Wait
             };
         }
@@ -592,9 +608,9 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
 
     public class Test
     {
-        public string BoardSettings { get; set; }
-        public IEnumerable<string> Elevators { get; set; }
-        public string FirstClone { get; set; }
+        public string BoardSettings { get; set; } = null!;
+        public IEnumerable<string> Elevators { get; set; } = null!;
+        public string FirstClone { get; set; } = null!;
     }
 
     public class Node
@@ -634,7 +650,9 @@ namespace Codingame.TheParanoidAndroidOneStepFurther
         public Point Position { get; set; }
         public CloneDirection CloneDirection { get; set; }
 
-        public Clone() { }
+        public Clone()
+        {
+        }
 
         public Clone(string input)
         {
